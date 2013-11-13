@@ -36,7 +36,7 @@ public class LiveCaptureProcessor {
         StringBuilder errbuf = new StringBuilder();
         int snaplen = 64 * 1024; // Capture all packets, no truncation
         int timeout = 10 * 1000; // 10 seconds in millis
-        Pcap pcap = Pcap.openLive(device.getName(), snaplen, Pcap.MODE_NON_PROMISCUOUS, timeout, errbuf);
+        final Pcap pcap = Pcap.openLive(device.getName(), snaplen, Pcap.MODE_NON_PROMISCUOUS, timeout, errbuf);
         if (pcap == null)
             throw new IllegalArgumentException(errbuf.toString());
 
@@ -49,10 +49,22 @@ public class LiveCaptureProcessor {
         int maxTokenLength = 32;
 
 
-        LatencyCollector latencyCollector = new ChainedLatencyCollector(
+        final LatencyCollector latencyCollector = new ChainedLatencyCollector(
                 new StatLatencyCollector(500),
                 new CsvFileLatencyCollector(outputFile, maxTokenLength)
         );
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    System.err.println("Shutting down...");
+                    pcap.breakloop();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         pcap.loop(-1,
                 LatencyTestPacketHandler.create(

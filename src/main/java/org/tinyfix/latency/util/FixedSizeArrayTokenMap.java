@@ -7,8 +7,8 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
     static class CircularBuffer {
         private final BufferEntry[] entries;
 
-        private long head = -1; // points to last produced entry
-        private long tail = -1; // points to last consumed entry
+        private volatile long head = -1; // points to last produced entry
+        private volatile long tail = -1; // points to last consumed entry
         private final int bufferSize, indexMask;
 
         public CircularBuffer(int bufferSize, int maxKeyLength) {

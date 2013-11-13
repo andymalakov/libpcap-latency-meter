@@ -10,7 +10,6 @@ import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
 
 class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
 
-    private final Ip4 ip = new Ip4();
     private final Tcp tcp = new Tcp();
     private final TcpPayloadHandler<T> [] handlers;
 
@@ -21,7 +20,6 @@ class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
     @Override
     public void nextPacket(JPacket packet, T cookie) {
         if (packet.hasHeader(Ip4.ID) && packet.hasHeader(Tcp.ID)) {
-            packet.getHeader(ip);
             packet.getHeader(tcp);
             final int size = tcp.getPayloadLength();
             if (size > 0) {

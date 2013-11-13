@@ -20,7 +20,7 @@ public class CsvFileLatencyCollector implements LatencyCollector {
     }
 
     @Override
-    public void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public synchronized void recordLatency(byte[] buffer, int offset, int length, long latency) {
 
         System.arraycopy(buffer, offset, lineBuffer, 0, length);
 

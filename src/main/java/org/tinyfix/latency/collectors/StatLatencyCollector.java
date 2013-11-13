@@ -14,7 +14,7 @@ public class StatLatencyCollector extends AbstractLatencyCollector {
     }
 
     @Override
-    public void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public synchronized void recordLatency(byte[] buffer, int offset, int length, long latency) {
         count++;
         window[index] = latency;
 
@@ -37,7 +37,7 @@ public class StatLatencyCollector extends AbstractLatencyCollector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (index > 0)
             System.out.println("min:" + min + " max:" + max + " avg:" + sum/index  + " (us.)");
 
