@@ -29,11 +29,6 @@ class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
         }
     }
 
-    static {
-        System.err.println("TODO: DO NOT FORGET TO REMOVE HACK THAT TRIMS ZEROS (both inbound/outbound hacks)");
-    }
-
-
     static <T> LatencyTestPacketHandler<T> create (final int inboundPort, final int inboundToken, final int outboundPort, final int outboundToken, final int maxTokenLength, final LatencyCollector latencyCollector) {
         final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(1024*1024, maxTokenLength);
         //final ByteSequence2LongMap timestampMap = new HashMapByteSequence2LongMap();
