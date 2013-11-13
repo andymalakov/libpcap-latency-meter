@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="jnetpcap">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jnetpcap.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit-4.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$JAVA_THIRD_PARTY$/jnetpcap-1.4.r1425/src/java1.5" />
+    </SOURCES>
+  </library>
+</component>
