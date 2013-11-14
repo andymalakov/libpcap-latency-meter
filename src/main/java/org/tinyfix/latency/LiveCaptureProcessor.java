@@ -50,7 +50,7 @@ public class LiveCaptureProcessor {
 
 
         final LatencyCollector latencyCollector = new ChainedLatencyCollector(
-                new StatLatencyCollector(500),
+                new StatLatencyCollector(100),
                 new CsvFileLatencyCollector(outputFile, maxTokenLength)
         );
 

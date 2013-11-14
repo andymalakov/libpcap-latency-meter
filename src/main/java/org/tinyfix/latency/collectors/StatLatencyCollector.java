@@ -1,7 +1,9 @@
 package org.tinyfix.latency.collectors;
 
-public class StatLatencyCollector extends AbstractLatencyCollector {
+import org.tinyfix.latency.util.TimeOfDayFormatter;
 
+public class StatLatencyCollector extends AbstractLatencyCollector {
+    private final char [] timestampBuffer = new char [TimeOfDayFormatter.FORMAT_LENGTH];
     private final long [] window;
     private long min, max, sum;
     private int index;
@@ -26,8 +28,9 @@ public class StatLatencyCollector extends AbstractLatencyCollector {
         sum += latency;
 
         if (++index == window.length) {
-
-            System.out.println("min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.)");
+            TimeOfDayFormatter.formatTimeOfDay(System.currentTimeMillis(), timestampBuffer);
+            System.out.print(timestampBuffer);
+            System.out.println(" min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.). Missed: " + numberOfMissingSignals);
 
             index = 0;
             sum = 0;
