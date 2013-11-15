@@ -11,8 +11,8 @@ public class StatLatencyCollector implements LatencyCollector {
     private int index;
     private long count;
 
-    private static final int MAX_INITIAL_SIGNALS_BEFORE_WARNING = 1000;
-    private static final int MAX_LOST_SIGNALS_WARNING_COUNT = 100;
+    private static final int MAX_INITIAL_SIGNALS_BEFORE_WARNING = 10;
+    private static final int MAX_LOST_SIGNALS_WARNING_COUNT = 3;
     protected long numberOfMissingSignals;
 
     public StatLatencyCollector (int windowSize, ByteSequence2LongMap signalsBuffer) {
@@ -41,7 +41,7 @@ public class StatLatencyCollector implements LatencyCollector {
         if (++index == window.length) {
             TimeOfDayFormatter.formatTimeOfDay(System.currentTimeMillis(), timestampBuffer);
             System.out.print(timestampBuffer);
-            System.out.println(" min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.). Missed: " + numberOfMissingSignals + " signal buffer: " + signalsBuffer.width());
+            System.out.println(" min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.). Missed: " + numberOfMissingSignals + " Buffer: " + signalsBuffer.width());
 
             index = 0;
             sum = 0;

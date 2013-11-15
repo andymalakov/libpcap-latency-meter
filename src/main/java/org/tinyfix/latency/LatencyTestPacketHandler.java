@@ -10,13 +10,15 @@ import org.tinyfix.latency.util.ByteSequence2LongMap;
 class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
 
     private final TcpPacketFilter inboundPacketFilter;
+    private final TcpPacketFilter outboundPacketFilter;
     private final CorrelationIdExtractor<T> inboundFlowHandler;
     private final CorrelationIdExtractor<T> outboundFlowHandler;
 
     private final Tcp tcp = new Tcp();
 
-    LatencyTestPacketHandler(TcpPacketFilter inboundPacketFilter, CorrelationIdExtractor<T> inbound, CorrelationIdExtractor<T> outbound) {
+    LatencyTestPacketHandler(TcpPacketFilter inboundPacketFilter, CorrelationIdExtractor<T> inbound, TcpPacketFilter outboundPacketFilter, CorrelationIdExtractor<T> outbound) {
         this.inboundPacketFilter = inboundPacketFilter;
+        this.outboundPacketFilter = outboundPacketFilter;
         this.inboundFlowHandler = inbound;
         this.outboundFlowHandler = outbound;
     }
@@ -30,6 +32,7 @@ class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
                 if (inboundPacketFilter.accept(tcp))
                     inboundFlowHandler.parse(packet, tcp.getPayloadOffset(), size, cookie);
                 else
+                if (outboundPacketFilter.accept(tcp))
                     outboundFlowHandler.parse(packet, tcp.getPayloadOffset(), size, cookie);
             }
         }
@@ -39,6 +42,12 @@ class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
         TcpPacketFilter inboundFlowFilter = new TcpPacketFilter () {
             public boolean accept(Tcp tcp) {
                 return tcp.source() == inboundPort;
+            }
+        };
+
+        TcpPacketFilter outboundFlowFilter = new TcpPacketFilter () {
+            public boolean accept(Tcp tcp) {
+                return tcp.destination() == outboundPort;
             }
         };
 
@@ -64,6 +73,6 @@ class LatencyTestPacketHandler<T> implements JPacketHandler<T> {
                 }
             };
 
-        return new LatencyTestPacketHandler<>(inboundFlowFilter, inboundFlowHandler, outboundFlowHandler);
+        return new LatencyTestPacketHandler<>(inboundFlowFilter, inboundFlowHandler, outboundFlowFilter, outboundFlowHandler);
     }
 }
