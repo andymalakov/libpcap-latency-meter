@@ -2,8 +2,6 @@ package org.tinyfix.latency.util;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.tinyfix.latency.util.AsciiUtils;
-import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +80,20 @@ public class TestFixedSizeArrayTokenMap {
 
     }
 
+    @Test
+    public void testOverFillBug() {
+        for (int i=0; i < maxCapacity; i++)
+            put ("K"+i, i);
+
+        assertEquals ("K0=0", get());
+
+        put ("K"+(maxCapacity+1), (maxCapacity+1));
+        put ("K"+(maxCapacity+2), (maxCapacity+2));
+
+        assertEquals ("K2=3", get());
+    }
+
+
     private void assertDumpEquals(String expected) {
         assertEquals("Dump match", expected, m.dump());
     }
@@ -108,6 +120,14 @@ public class TestFixedSizeArrayTokenMap {
     private long get (String key) {
         byte [] keyBuffer = AsciiUtils.getBytes(key);
         return m.get(keyBuffer, 0, keyBuffer.length);
+    }
+
+    private String get () {
+        FixedSizeArrayTokenMap.BufferEntry e = m.get();
+        if (e != null) {
+            return e.toString();
+        }
+        return null;
     }
 
 }

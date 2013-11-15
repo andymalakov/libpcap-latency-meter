@@ -17,4 +17,6 @@ public interface ByteSequence2LongMap {
      * @return Timestamp for given key, or -1L of key not found */
     long get(byte[] keyBuffer, int offset, int length);
 
+
+    long width();
 }

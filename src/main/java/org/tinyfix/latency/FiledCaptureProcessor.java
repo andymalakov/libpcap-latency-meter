@@ -5,6 +5,8 @@ import org.tinyfix.latency.collectors.ChainedLatencyCollector;
 import org.tinyfix.latency.collectors.CsvFileLatencyCollector;
 import org.tinyfix.latency.collectors.LatencyCollector;
 import org.tinyfix.latency.collectors.StatLatencyCollector;
+import org.tinyfix.latency.util.ByteSequence2LongMap;
+import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
 
 public class FiledCaptureProcessor {
 
@@ -32,8 +34,10 @@ public class FiledCaptureProcessor {
 
         int maxTokenLength = 32;
 
+        final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(1024*1024, maxTokenLength); // = new HashMapByteSequence2LongMap();
+
         LatencyCollector latencyCollector = new ChainedLatencyCollector(
-            new StatLatencyCollector(4096),
+            new StatLatencyCollector(4096, timestampMap),
             new CsvFileLatencyCollector("latencies.csv", maxTokenLength)
         );
 
@@ -43,7 +47,8 @@ public class FiledCaptureProcessor {
                 inboundPort, inboundToken,
                 outboundPort, outboundToken,
                 maxTokenLength,
-                latencyCollector), null);
+                latencyCollector,
+                timestampMap), null);
 
         latencyCollector.close();
 

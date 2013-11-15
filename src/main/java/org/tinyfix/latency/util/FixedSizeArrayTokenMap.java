@@ -4,11 +4,11 @@ import java.util.List;
 
 public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
 
-    static class CircularBuffer {
+    private static class CircularBuffer {
         private final BufferEntry[] entries;
 
-        private volatile long head = -1; // points to last produced entry
-        private volatile long tail = -1; // points to last consumed entry
+        private long head = -1; // points to last produced entry
+        private long tail = -1; // points to last consumed entry
         private final int bufferSize, indexMask;
 
         public CircularBuffer(int bufferSize, int maxKeyLength) {
@@ -27,16 +27,16 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
         }
 
         private BufferEntry index(long sequence) {
-            return entries[(int)sequence & indexMask];
+            return entries[((int)sequence) & indexMask];
         }
 
-        public BufferEntry put() {
+        public synchronized BufferEntry put() {
             head++;
             assert head > tail;
             return index(head);
         }
 
-        public BufferEntry get() {
+        public synchronized BufferEntry get() {
             long delta = head - tail;
             if (delta == 0)
                 return null; // empty
@@ -51,7 +51,7 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
             return index(tail);
         }
 
-        void appendTo(List<BufferEntry> result) {
+        synchronized void appendTo(List<BufferEntry> result) {
             long t = tail + 1;
             long span = head - bufferSize;
             if (t < span)
@@ -60,6 +60,27 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
             while (t <= head) {
                 result.add (index(t++));
             }
+        }
+
+        synchronized long width() {
+            return head - tail;
+        }
+
+        @Override
+        public synchronized String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("H:");
+            sb.append(head);
+            sb.append(" T:");
+            sb.append(tail);
+            sb.append(" {");
+            for (int i = 0; i < bufferSize; i++) {
+                if (i > 0)
+                    sb.append(", ");
+                sb.append(entries[i]);
+            }
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -127,27 +148,33 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
         return  NOT_FOUND;
     }
 
+    /**
+     * Used by logging
+     * @return in case of overruns width may exceed buffer size
+     */
+    @Override
+    public long width() {
+        return buffer.width();
+    }
+
     // Unit tests
     void snapshot(List<BufferEntry> content) {
         content.clear();
         buffer.appendTo(content);
     }
 
+    BufferEntry get() {
+        return buffer.get();
+    }
+
+    @Override
+    public String toString () {
+        return dump();
+    }
+
     // Unit tests
     String dump() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("H:");
-        sb.append(buffer.head);
-        sb.append(" T:");
-        sb.append(buffer.tail);
-        sb.append(" {");
-        for (int i = 0; i < buffer.bufferSize; i++) {
-            if (i > 0)
-                sb.append(", ");
-            sb.append(buffer.entries[i]);
-        }
-        sb.append('}');
-        return sb.toString();
+        return buffer.toString();
     }
 
 }

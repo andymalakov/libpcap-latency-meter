@@ -7,6 +7,8 @@ import org.tinyfix.latency.collectors.ChainedLatencyCollector;
 import org.tinyfix.latency.collectors.CsvFileLatencyCollector;
 import org.tinyfix.latency.collectors.LatencyCollector;
 import org.tinyfix.latency.collectors.StatLatencyCollector;
+import org.tinyfix.latency.util.ByteSequence2LongMap;
+import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +50,15 @@ public class LiveCaptureProcessor {
         final String outputFile = (args.length > 6) ? args[6] : "latencies.csv";
         int maxTokenLength = 32;
 
+        int bufferSize = 4096*1024;
+        final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(bufferSize, maxTokenLength); // = new HashMapByteSequence2LongMap(bufferSize);
+
+        System.out.println("Buffer size: " + bufferSize + 'b');
 
         final LatencyCollector latencyCollector = new ChainedLatencyCollector(
-                new StatLatencyCollector(100),
+                new StatLatencyCollector(100, timestampMap),
                 new CsvFileLatencyCollector(outputFile, maxTokenLength)
         );
-
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -71,7 +76,8 @@ public class LiveCaptureProcessor {
                         inboundPort, inboundToken,
                         outboundPort, outboundToken,
                         maxTokenLength,
-                        latencyCollector), null);
+                        latencyCollector,
+                        timestampMap), null);
 
         pcap.close();
         latencyCollector.close();
