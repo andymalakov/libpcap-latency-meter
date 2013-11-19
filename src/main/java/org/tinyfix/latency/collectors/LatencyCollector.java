@@ -7,9 +7,10 @@ public interface LatencyCollector extends AutoCloseable {
      * @param buffer buffer containing token
      * @param offset token offset
      * @param length token length
-     * @param latency latency in microseconds
+     * @param inboundTimestamp Timestamp of inbound signal (microseconds) (time of day since local midnight?)
+     * @param outboundTimestamp Timestamp of inbound signal (microseconds) (time of day since local midnight?)
      */
-    void recordLatency(byte[] buffer, int offset, int length, long latency);
+    void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp);
 
     /** Notifies about an error when outbound packet cannot be matched with inbound packet (possible cause is double order or short history of ticks)*/
     void missingInboundSignal(byte[] buffer, int offset, int length);

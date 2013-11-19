@@ -5,8 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class BinaryFileLatencyCollector implements LatencyCollector {
-    private final OutputStream os;
+public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
     private final byte [] writeBuffer = new byte[8];
 
     public BinaryFileLatencyCollector(String filename, int maxTokenLength) throws IOException {
@@ -14,24 +13,20 @@ public class BinaryFileLatencyCollector implements LatencyCollector {
     }
 
     public BinaryFileLatencyCollector(OutputStream os, int maxTokenLength) throws IOException {
+        super(os);
         assert maxTokenLength < 256; // we fit token length into single byte
-        this.os = os;
     }
 
     @Override
-    public void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public synchronized void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         assert length < 256;
         try {
             os.write(length);
             os.write(buffer, offset, length);
-            writeLong (latency);
+            writeLong (outboundTimestamp - inboundTimestamp);
         } catch (IOException e) {
             throw new RuntimeException("Error writing latency stats", e);
         }
-    }
-
-    @Override
-    public void missingInboundSignal(byte[] buffer, int offset, int length) {
     }
 
     private void writeLong(long v) throws IOException {
@@ -44,16 +39,6 @@ public class BinaryFileLatencyCollector implements LatencyCollector {
         writeBuffer[6] = (byte)(v >>>  8);
         writeBuffer[7] = (byte)(v >>>  0);
         os.write(writeBuffer, 0, 8);
-    }
-
-
-    @Override
-    public void close() {
-        try {
-            os.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Error writing latency stats", e);
-        }
     }
 
 }

@@ -5,7 +5,7 @@ public class StdoutLatencyCollector implements LatencyCollector {
     private StringBuilder sb = new StringBuilder(128);
 
     @Override
-    public void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         sb.setLength(0);
         sb.append("Token ");
         for (int i = 0; i < length; i++) {
@@ -13,7 +13,7 @@ public class StdoutLatencyCollector implements LatencyCollector {
         }
         sb.append(": ");
 
-        sb.append(latency);
+        sb.append(outboundTimestamp-inboundTimestamp);
         sb.append('\n');
         System.out.print (sb.toString());
     }

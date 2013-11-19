@@ -20,7 +20,6 @@ abstract class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
      * @param maxTokenLength maximum size of tag value (in bytes)
      */
     FixMessageTagExtractor(int tokenTagNum, int maxTokenLength) {
-        System.out.println("Scanning FIX tag " + tokenTagNum);
         this.tokenPrefix = AsciiUtils.getBytes("\001" + Integer.toString(tokenTagNum) + "=");  //  |11=
         this.maxTokenLength = maxTokenLength;
         this.tokenValueBuffer = new byte[maxTokenLength];

@@ -9,9 +9,9 @@ public class ChainedLatencyCollector implements LatencyCollector {
     }
 
     @Override
-    public void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         for (int i = 0; i < chain.length; i++) {
-            chain[i].recordLatency(buffer, offset, length, latency);
+            chain[i].recordLatency(buffer, offset, length, inboundTimestamp, outboundTimestamp);
         }
     }
 

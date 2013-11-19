@@ -24,9 +24,11 @@ public class StatLatencyCollector implements LatencyCollector {
 
 
     @Override
-    public synchronized void recordLatency(byte[] buffer, int offset, int length, long latency) {
+    public synchronized void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         if (count == 0)
             numberOfMissingSignals = 0; // reset missing signal count, from this moment we will warn users about each missing signal
+
+        final long latency = outboundTimestamp - inboundTimestamp;
 
         count++;
         window[index] = latency;

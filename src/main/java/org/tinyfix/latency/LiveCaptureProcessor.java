@@ -33,12 +33,13 @@ public class LiveCaptureProcessor {
         PcapIf device = selectPcapIf(interfaceId);
         System.out.println("Recording from: " + device.getName() + " (" + device.getDescription() + ')');
 
+        System.out.println("Correlating FIX tag " + inboundToken + " in inbound traffic from port "  + inboundPort+ " with FIX tag " + outboundToken + " in outbound traffic going to " + outboundPort);
 
 
         StringBuilder errbuf = new StringBuilder();
-        int snaplen = 64 * 1024; // Capture all packets, no truncation
-        int timeout = 10 * 1000; // 10 seconds in millis
-        final Pcap pcap = Pcap.openLive(device.getName(), snaplen, Pcap.MODE_NON_PROMISCUOUS, timeout, errbuf);
+        int snaplen = 64 * 1024; // We do not expect packets larger than 64K
+        int connectTimeout = 10 * 1000; // 10 seconds in millis
+        final Pcap pcap = Pcap.openLive(device.getName(), snaplen, Pcap.MODE_NON_PROMISCUOUS, connectTimeout, errbuf);
         if (pcap == null)
             throw new IllegalArgumentException(errbuf.toString());
 
@@ -50,14 +51,14 @@ public class LiveCaptureProcessor {
         final String outputFile = (args.length > 6) ? args[6] : "latencies.csv";
         int maxTokenLength = 32;
 
-        int bufferSize = 4096*1024;
+        int bufferSize = 16*1024;
         final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(bufferSize, maxTokenLength); // = new HashMapByteSequence2LongMap(bufferSize);
 
-        System.out.println("Buffer size: " + bufferSize + 'b');
+        System.out.println("Inbound signals buffer size: " + bufferSize + 'b');
 
         final LatencyCollector latencyCollector = new ChainedLatencyCollector(
-                new StatLatencyCollector(100, timestampMap),
-                new CsvFileLatencyCollector(outputFile, maxTokenLength)
+            new StatLatencyCollector(100, timestampMap),
+            new CsvFileLatencyCollector(outputFile, maxTokenLength)
         );
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
