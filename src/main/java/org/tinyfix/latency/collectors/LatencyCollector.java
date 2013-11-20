@@ -4,9 +4,9 @@ public interface LatencyCollector extends AutoCloseable {
 
 
     /**
-     * @param buffer buffer containing token
-     * @param offset token offset
-     * @param length token length
+     * @param buffer buffer containing correlation ID
+     * @param offset correlation ID offset
+     * @param length correlation ID length
      * @param inboundTimestamp Timestamp of inbound signal (microseconds) (time of day since local midnight?)
      * @param outboundTimestamp Timestamp of inbound signal (microseconds) (time of day since local midnight?)
      */

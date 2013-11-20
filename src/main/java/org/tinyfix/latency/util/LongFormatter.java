@@ -2,7 +2,7 @@ package org.tinyfix.latency.util;
 
 import java.util.Arrays;
 
-/** java.lang.Long.toString(long) adapted to byte[] output */
+/** java.lang.Long.toString(long) adapted to byte[] output. Output is padded with leading spaces. */
 public class LongFormatter {
     private static final byte [] Digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 

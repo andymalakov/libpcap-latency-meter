@@ -1,4 +1,4 @@
-package org.tinyfix.latency;
+package org.tinyfix.latency.protocols;
 
 final class ParseException extends RuntimeException {
     public ParseException(String message) {

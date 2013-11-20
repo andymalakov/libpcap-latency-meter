@@ -1,5 +1,7 @@
 package org.tinyfix.latency.collectors;
 
+import org.tinyfix.latency.common.CaptureSettings;
+
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,13 +10,13 @@ import java.io.OutputStream;
 public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
     private final byte [] writeBuffer = new byte[8];
 
-    public BinaryFileLatencyCollector(String filename, int maxTokenLength) throws IOException {
-        this(new BufferedOutputStream(new FileOutputStream(filename), 8192), maxTokenLength);
+    public BinaryFileLatencyCollector(String filename) throws IOException {
+        this(new BufferedOutputStream(new FileOutputStream(filename), 8192));
     }
 
-    public BinaryFileLatencyCollector(OutputStream os, int maxTokenLength) throws IOException {
+    public BinaryFileLatencyCollector(OutputStream os) throws IOException {
         super(os);
-        assert maxTokenLength < 256; // we fit token length into single byte
+        assert CaptureSettings.MAX_CORRELATION_ID_LENGTH <= 256; // we fit correlation ID length into single byte
     }
 
     @Override

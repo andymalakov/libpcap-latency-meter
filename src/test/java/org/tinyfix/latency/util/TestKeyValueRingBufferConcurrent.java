@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class TestFixedSizeArrayTokenMapConcurrent {
+public class TestKeyValueRingBufferConcurrent {
 
     private static final int maxCapacity = 1 << 16;
     private static final int maxKeyLength = 32;
@@ -15,7 +15,7 @@ public class TestFixedSizeArrayTokenMapConcurrent {
     @Test
     public void testProducerConsumer() throws InterruptedException {
         BlockingQueue queue = new LinkedBlockingQueue();
-        FixedSizeArrayTokenMap buffer = new FixedSizeArrayTokenMap(maxCapacity, maxKeyLength);
+        KeyValueRingBuffer buffer = new KeyValueRingBuffer(maxCapacity, maxKeyLength);
         ProducerThread producer = new ProducerThread (buffer, 5, queue);
         ConsumerThread consumer = new ConsumerThread (buffer, 5, 7, queue);
 
@@ -29,12 +29,12 @@ public class TestFixedSizeArrayTokenMapConcurrent {
     }
 
     private static abstract class BufferTestThread extends Thread {
-        protected final FixedSizeArrayTokenMap buffer;
+        protected final KeyValueRingBuffer buffer;
         protected final BlockingQueue queue;
         private volatile boolean active = true;
 
 
-        private BufferTestThread(String name, FixedSizeArrayTokenMap buffer, BlockingQueue queue) {
+        private BufferTestThread(String name, KeyValueRingBuffer buffer, BlockingQueue queue) {
             this.queue = queue;
             setName(name);
             this.buffer = buffer;
@@ -71,11 +71,12 @@ public class TestFixedSizeArrayTokenMapConcurrent {
         private final int sleepInterval;
         private final Random rnd = new Random(System.currentTimeMillis());
 
-        private ProducerThread(FixedSizeArrayTokenMap buffer, int sleepInterval, BlockingQueue queue) {
+        private ProducerThread(KeyValueRingBuffer buffer, int sleepInterval, BlockingQueue queue) {
             super("Producer", buffer, queue);
             this.sleepInterval = sleepInterval;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void run(long sequence, byte[] key) throws InterruptedException {
             buffer.put(key, 0, key.length, sequence);
@@ -89,7 +90,7 @@ public class TestFixedSizeArrayTokenMapConcurrent {
         private final int sleepInterval;
         private final Random rnd = new Random(System.currentTimeMillis());
 
-        private ConsumerThread(FixedSizeArrayTokenMap buffer, int sleepInterval, int consumeStep, BlockingQueue queue) {
+        private ConsumerThread(KeyValueRingBuffer buffer, int sleepInterval, int consumeStep, BlockingQueue queue) {
             super("Consumer", buffer, queue);
             this.consumeStep = consumeStep;
             this.sleepInterval = sleepInterval;
@@ -100,7 +101,7 @@ public class TestFixedSizeArrayTokenMapConcurrent {
             queue.take();
             if (sequence % consumeStep == 0) {
                 long value = buffer.get(key, 0, key.length);
-                if (value == FixedSizeArrayTokenMap.NOT_FOUND)
+                if (value == KeyValueRingBuffer.NOT_FOUND)
                     Assert.fail ("Lost signal#" + new String(key));
                 if (value != sequence)
                     Assert.fail("Sequence for key " + new String(key) + " is incorrect. Expeted: " + sequence + " got: " + value);

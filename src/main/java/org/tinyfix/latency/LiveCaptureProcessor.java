@@ -3,94 +3,65 @@ package org.tinyfix.latency;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
-import org.tinyfix.latency.collectors.ChainedLatencyCollector;
-import org.tinyfix.latency.collectors.CsvFileLatencyCollector;
-import org.tinyfix.latency.collectors.LatencyCollector;
-import org.tinyfix.latency.collectors.StatLatencyCollector;
-import org.tinyfix.latency.util.ByteSequence2LongMap;
-import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
+import org.tinyfix.latency.common.CaptureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiveCaptureProcessor {
+public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
 
-    public static void main (String [] args) throws Exception {
+    protected int interfaceId = -1;
+    protected String captureFilter;
 
-        if (args.length == 0) {
-            printNetworkInterfaces();
-            System.exit(0);
+    @Override
+    protected boolean parseCommandLineArgument (String arg) {
+        if (arg.startsWith("-interface:")) {
+            interfaceId = Integer.parseInt(value(arg));
+            return true;
         }
+        if (arg.startsWith("-filter:")) {
+            captureFilter = value(arg);
+            return true;
+        }
+        return super.parseCommandLineArgument(arg);
+    }
 
-        int interfaceId = Integer.parseInt(args[0]);
+    @Override
+    protected void printHelp () {
+        super.printHelp();
+        System.out.println("\t-interface:N\t- Specifies index of interface to listen on. Default is 0.");
+        System.out.println("\t-filter:<capture filter>\t- Specifies LIBPCAP capture filter, for example: \"(tcp src port 2509) or (tcp dst port 2508)\"");
+    }
 
+    @Override
+    protected void run(String ... args) throws Exception {
+        super.run(args);
 
-        int inboundPort = Integer.parseInt(args[1]);
-        int inboundToken = Integer.parseInt(args[2]); //FIX tag to watch for in the inbound traffic
-        int outboundPort = Integer.parseInt(args[3]);
-        int outboundToken = Integer.parseInt(args[4]);  //FIX tag to watch for in the outbound traffic
-
+        if (interfaceId == -1) {
+            printNetworkInterfaces();
+            interfaceId = 0;
+        }
         PcapIf device = selectPcapIf(interfaceId);
         System.out.println("Recording from: " + device.getName() + " (" + device.getDescription() + ')');
 
-        System.out.println("Correlating FIX tag " + inboundToken + " in inbound traffic from port "  + inboundPort+ " with FIX tag " + outboundToken + " in outbound traffic going to " + outboundPort);
 
+        StringBuilder err = new StringBuilder();
 
-        StringBuilder errbuf = new StringBuilder();
-        int snaplen = 64 * 1024; // We do not expect packets larger than 64K
-        int connectTimeout = 10 * 1000; // 10 seconds in millis
-        final Pcap pcap = Pcap.openLive(device.getName(), snaplen, Pcap.MODE_NON_PROMISCUOUS, connectTimeout, errbuf);
+        final Pcap pcap = Pcap.openLive(device.getName(), CaptureSettings.PACKET_SNAP_LENGTH, Pcap.MODE_NON_PROMISCUOUS, CaptureSettings.OPEN_LIVE_TIMEOUT_MILLIS, err);
         if (pcap == null)
-            throw new IllegalArgumentException(errbuf.toString());
+            throw new IllegalArgumentException(err.toString());
 
+        if (captureFilter != null)
+            setupFilter(pcap, captureFilter);
 
-        final String filter = (args.length > 5) ? args[5] : null;
-        if (filter != null)
-            setupFilter(pcap, filter);
-
-        final String outputFile = (args.length > 6) ? args[6] : "latencies.csv";
-        int maxTokenLength = 32;
-
-        int bufferSize = 16*1024;
-        final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(bufferSize, maxTokenLength); // = new HashMapByteSequence2LongMap(bufferSize);
-
-        System.out.println("Inbound signals buffer size: " + bufferSize + 'b');
-
-        final LatencyCollector latencyCollector = new ChainedLatencyCollector(
-            new StatLatencyCollector(100, timestampMap),
-            new CsvFileLatencyCollector(outputFile, maxTokenLength)
-        );
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                try {
-                    System.err.println("Shutting down...");
-                    pcap.breakloop();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        pcap.loop(-1,
-                LatencyTestPacketHandler.create(
-                        inboundPort, inboundToken,
-                        outboundPort, outboundToken,
-                        maxTokenLength,
-                        latencyCollector,
-                        timestampMap), null);
-
-        pcap.close();
-        latencyCollector.close();
-        if (errbuf.length() > 0)
-            System.err.println(errbuf.toString());
+        runCaptureLoop(pcap, err);
     }
+
 
     private static void setupFilter(Pcap pcap, String expression) throws Exception {
         PcapBpfProgram program = new PcapBpfProgram();
-        int optimize = 0;         // 0 = false
-        int netmask = 0xFFFFFF00; // 255.255.255.0
-        if (pcap.compile(program, expression, optimize, netmask) != Pcap.OK)
+        final int netmask = Integer.parseInt(CaptureSettings.FILTER_NETWORK_MASK_HEX,  16);
+        if (pcap.compile(program, expression, CaptureSettings.OPTIMIZE_FILTER ? 1 : 0, netmask) != Pcap.OK)
             throw new Exception("Error compiling LIBPCAP filter: " + pcap.getErr());
 
         if (pcap.setFilter(program) != Pcap.OK)
@@ -124,4 +95,10 @@ public class LiveCaptureProcessor {
             System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
         }
     }
+
+
+    public static void main (String [] args) throws Exception {
+        new LiveCaptureProcessor().run(args);
+    }
+
 }

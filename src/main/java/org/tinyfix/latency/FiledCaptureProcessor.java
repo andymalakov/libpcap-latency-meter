@@ -1,60 +1,38 @@
 package org.tinyfix.latency;
 
 import org.jnetpcap.Pcap;
-import org.tinyfix.latency.collectors.ChainedLatencyCollector;
-import org.tinyfix.latency.collectors.CsvFileLatencyCollector;
-import org.tinyfix.latency.collectors.LatencyCollector;
-import org.tinyfix.latency.collectors.StatLatencyCollector;
-import org.tinyfix.latency.util.ByteSequence2LongMap;
-import org.tinyfix.latency.util.FixedSizeArrayTokenMap;
 
-public class FiledCaptureProcessor {
+public class FiledCaptureProcessor extends AbstractCaptureProcessor {
+    private String captureFileName = "capture.pcap";
 
-    private static void printHelp() {
-        System.out.println("Command line arguments: <filename> <inboundPort> <inboundFixTag> <outboundPort> <outboundFixTag>");
+    @Override
+    protected boolean parseCommandLineArgument (String arg) {
+        if (arg.startsWith("-pcap:")) {
+            captureFileName = value(arg);
+            return true;
+        }
+        return super.parseCommandLineArgument(arg);
+    }
+
+    @Override
+    protected void printHelp () {
+        super.printHelp();
+        System.out.println("\t-pcap:filename\t- Specifies filename of input capture file (in PCAP format).");
+    }
+
+    @Override
+    protected void run(String ... args) throws Exception {
+        super.run(args);
+
+        StringBuilder err = new StringBuilder();
+        Pcap pcap = Pcap.openOffline(captureFileName, err);
+        if (pcap == null)
+            throw new IllegalArgumentException(err.toString());
+
+        runCaptureLoop(pcap, err);
     }
 
     public static void main (String [] args) throws Exception {
-        if (args.length == 0) {
-            printHelp();
-            System.exit(-1);
-        }
-
-        String filename = args[0];
-
-        int inboundPort = Integer.parseInt(args[1]);
-        int inboundToken = Integer.parseInt(args[2]); //FIX tag to watch for in the inbound traffic
-        int outboundPort = Integer.parseInt(args[3]);
-        int outboundToken = Integer.parseInt(args[4]);  //FIX tag to watch for in the outbound traffic
-
-        StringBuilder errbuf = new StringBuilder();
-        Pcap pcap = Pcap.openOffline(filename, errbuf);
-        if (pcap == null)
-            throw new IllegalArgumentException(errbuf.toString());
-
-        int maxTokenLength = 32;
-
-        final ByteSequence2LongMap timestampMap = new FixedSizeArrayTokenMap(1024*1024, maxTokenLength); // = new HashMapByteSequence2LongMap();
-
-        LatencyCollector latencyCollector = new ChainedLatencyCollector(
-            new StatLatencyCollector(4096, timestampMap),
-            new CsvFileLatencyCollector("latencies.csv", maxTokenLength)
-        );
-
-
-        pcap.loop(-1,
-            LatencyTestPacketHandler.create(
-                inboundPort, inboundToken,
-                outboundPort, outboundToken,
-                maxTokenLength,
-                latencyCollector,
-                timestampMap), null);
-
-        latencyCollector.close();
-
-        pcap.close();
-        if (errbuf.length() > 0)
-            System.err.println(errbuf.toString());
+        new FiledCaptureProcessor().run(args);
     }
-
 }

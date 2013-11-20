@@ -8,23 +8,23 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestFixedSizeArrayTokenMap {
+public class TestKeyValueRingBuffer {
 
     private static final int maxCapacity = 8;
     private static final int maxKeyLength = 32;
-    private FixedSizeArrayTokenMap m = new FixedSizeArrayTokenMap(maxCapacity, maxKeyLength);
+    private KeyValueRingBuffer m = new KeyValueRingBuffer(maxCapacity, maxKeyLength);
 
     @Test
     public void testEmpty() {
         assertDumpEquals("H:-1 T:-1 {=0, =0, =0, =0, =0, =0, =0, =0}");
         assertContentEquals("");
-        Assert.assertEquals(FixedSizeArrayTokenMap.NOT_FOUND, get("UNKNOWN"));
+        Assert.assertEquals(KeyValueRingBuffer.NOT_FOUND, get("UNKNOWN"));
     }
 
 
     @Test
     public void testSingleFill() {
-        Assert.assertEquals(FixedSizeArrayTokenMap.NOT_FOUND, get("UNKNOWN"));
+        Assert.assertEquals(KeyValueRingBuffer.NOT_FOUND, get("UNKNOWN"));
         for (int i=0; i < maxCapacity; i++)
             put ("K"+i, i);
 
@@ -33,7 +33,7 @@ public class TestFixedSizeArrayTokenMap {
             assertEquals ("Entry#" + i, i, get("K" + i));
 
         assertContentEquals(""); // empty
-        Assert.assertEquals(FixedSizeArrayTokenMap.NOT_FOUND, get("UNKNOWN"));
+        Assert.assertEquals(KeyValueRingBuffer.NOT_FOUND, get("UNKNOWN"));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class TestFixedSizeArrayTokenMap {
             put ("K"+i, i);
 
         assertContentEquals("K0=0, K1=1, K2=2, K3=3, K4=4, K5=5, K6=6, K7=7");
-        Assert.assertEquals(FixedSizeArrayTokenMap.NOT_FOUND, get("UNKNOWN"));
+        Assert.assertEquals(KeyValueRingBuffer.NOT_FOUND, get("UNKNOWN"));
         assertContentEquals(""); // empty
     }
 
@@ -90,7 +90,7 @@ public class TestFixedSizeArrayTokenMap {
         put ("K"+(maxCapacity+1), (maxCapacity+1));
         put ("K"+(maxCapacity+2), (maxCapacity+2));
 
-        assertEquals ("K2=3", get());
+        assertEquals ("K2=2", get());
     }
 
 
@@ -99,11 +99,11 @@ public class TestFixedSizeArrayTokenMap {
     }
 
     private void assertContentEquals(String expectedContent) {
-        List<FixedSizeArrayTokenMap.BufferEntry> content = new ArrayList<>();
+        List<KeyValueRingBuffer.BufferEntry> content = new ArrayList<>();
         m.snapshot(content);
 
         StringBuilder sb = new StringBuilder();
-        for (FixedSizeArrayTokenMap.BufferEntry entry : content) {
+        for (KeyValueRingBuffer.BufferEntry entry : content) {
             if (sb.length() != 0)
                 sb.append(", ");
             sb.append(entry.toString());
@@ -123,7 +123,7 @@ public class TestFixedSizeArrayTokenMap {
     }
 
     private String get () {
-        FixedSizeArrayTokenMap.BufferEntry e = m.get();
+        KeyValueRingBuffer.BufferEntry e = m.get();
         if (e != null) {
             return e.toString();
         }

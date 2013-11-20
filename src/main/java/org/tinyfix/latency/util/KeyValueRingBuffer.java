@@ -2,7 +2,7 @@ package org.tinyfix.latency.util;
 
 import java.util.List;
 
-public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
+public class KeyValueRingBuffer implements ByteSequence2LongMap {
 
     private static class CircularBuffer {
         private final BufferEntry[] entries;
@@ -19,7 +19,7 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
             this.indexMask = bufferSize - 1;
             this.bufferSize = bufferSize;
 
-            // preallocate space for tokens
+            // preallocate space for correlation IDs
             this.entries = new BufferEntry [bufferSize];
             for (int i=0; i < bufferSize; i++) {
                 entries[i] = new BufferEntry(maxKeyLength);
@@ -119,7 +119,7 @@ public class FixedSizeArrayTokenMap implements ByteSequence2LongMap {
     private final int maxKeyLength;
     private final CircularBuffer buffer;
 
-    public FixedSizeArrayTokenMap (int maxCapacity, int maxKeyLength) {
+    public KeyValueRingBuffer(int maxCapacity, int maxKeyLength) {
         this.buffer = new CircularBuffer(maxCapacity, maxKeyLength);
         this.maxKeyLength = maxKeyLength;
     }

@@ -7,7 +7,7 @@ public class StdoutLatencyCollector implements LatencyCollector {
     @Override
     public void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         sb.setLength(0);
-        sb.append("Token ");
+        sb.append("ID ");
         for (int i = 0; i < length; i++) {
             sb.append(buffer[offset++]);
         }

@@ -27,7 +27,8 @@ public class TestLongFormatter {
 
 
     private static void assertFormat(long value) {
-        String expectedFormat = Long.toString(value);
+        String expectedFormat = String.format("%1$20d", value);
+
 
         byte [] buffer = new byte [20];
         int end = LongFormatter.format(value, buffer, 0);
