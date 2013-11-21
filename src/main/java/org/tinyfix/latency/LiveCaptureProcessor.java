@@ -60,7 +60,7 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
 
     private static void setupFilter(Pcap pcap, String expression) throws Exception {
         PcapBpfProgram program = new PcapBpfProgram();
-        final int netmask = Integer.parseInt(CaptureSettings.FILTER_NETWORK_MASK_HEX,  16);
+        final int netmask = (int)Long.parseLong(CaptureSettings.FILTER_NETWORK_MASK_HEX.toLowerCase(),  16);
         if (pcap.compile(program, expression, CaptureSettings.OPTIMIZE_FILTER ? 1 : 0, netmask) != Pcap.OK)
             throw new Exception("Error compiling LIBPCAP filter: " + pcap.getErr());
 
