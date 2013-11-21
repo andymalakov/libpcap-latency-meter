@@ -23,7 +23,7 @@ public class AbstractCaptureProcessor<T> {
         parse(args);
     }
 
-    protected void parse(String ... args) {
+    protected void parse(String ... args) throws Exception {
         if (args.length == 0) {
             printHelp();
             System.exit(1);
@@ -35,7 +35,7 @@ public class AbstractCaptureProcessor<T> {
         }
     }
 
-    protected void printHelp () {
+    protected void printHelp () throws Exception {
         System.out.println("COMMAND LINE ARGUMENTS:");
         System.out.println("\t-in:<protocol-handler>\t- Specifies inbound protocol handler. For example: -in:timebase ");
         System.out.println("\t-out:<protocol-handler>\t- Specifies outbound protocol handler. For example: -out:fix:299");

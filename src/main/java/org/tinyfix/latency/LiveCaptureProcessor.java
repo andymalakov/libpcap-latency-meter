@@ -27,10 +27,13 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
     }
 
     @Override
-    protected void printHelp () {
+    protected void printHelp () throws Exception {
         super.printHelp();
         System.out.println("\t-interface:N\t- Specifies index of interface to listen on. Default is 0.");
         System.out.println("\t-filter:<capture filter>\t- Specifies LIBPCAP capture filter, for example: \"(tcp src port 2509) or (tcp dst port 2508)\"");
+
+        System.out.println();
+        printNetworkInterfaces();
     }
 
     @Override
@@ -60,7 +63,7 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
 
     private static void setupFilter(Pcap pcap, String expression) throws Exception {
         PcapBpfProgram program = new PcapBpfProgram();
-        final int netmask = (int)Long.parseLong(CaptureSettings.FILTER_NETWORK_MASK_HEX.toLowerCase(),  16);
+        final int netmask = (int)Long.parseLong(CaptureSettings.FILTER_NETWORK_MASK_HEX.toLowerCase(), 16);
         if (pcap.compile(program, expression, CaptureSettings.OPTIMIZE_FILTER ? 1 : 0, netmask) != Pcap.OK)
             throw new Exception("Error compiling LIBPCAP filter: " + pcap.getErr());
 

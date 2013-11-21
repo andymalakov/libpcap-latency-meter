@@ -15,7 +15,7 @@ public class FiledCaptureProcessor extends AbstractCaptureProcessor {
     }
 
     @Override
-    protected void printHelp () {
+    protected void printHelp () throws Exception {
         super.printHelp();
         System.out.println("\t-pcap:filename\t- Specifies filename of input capture file (in PCAP format).");
     }
