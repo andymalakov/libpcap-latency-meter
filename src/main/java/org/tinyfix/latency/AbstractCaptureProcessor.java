@@ -12,12 +12,15 @@ import org.tinyfix.latency.util.ByteSequence2LongMap;
 import org.tinyfix.latency.util.KeyValueRingBuffer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AbstractCaptureProcessor<T> {
-    protected String outputCsvFile = "latencies.csv";
+    protected String outputFile = "latencies.csv";
     protected TcpPacketFilter packetFilter = new HostBasedPacketFilter();
     protected ProtocolHandlerFactory<T> inboundHandler;
     protected ProtocolHandlerFactory<T> outboundHandler;
+    protected int statBufferSize = 100;
 
     protected void run (String ... args) throws Exception {
         parse(args);
@@ -40,6 +43,7 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("\t-in:<protocol-handler>\t- Specifies inbound protocol handler. For example: -in:timebase ");
         System.out.println("\t-out:<protocol-handler>\t- Specifies outbound protocol handler. For example: -out:fix:299");
         System.out.println("\t-csv:filename\t- Specifies file name of output file will latencies stats. [Optional]");
+        System.out.println("\t-stat:N\t- Specifies number of outbound signal signals to display console progress. [Optional]");
     }
 
     protected boolean parseCommandLineArgument (String arg) {
@@ -56,8 +60,17 @@ public class AbstractCaptureProcessor<T> {
             outboundHandler = ProtocolHandlers.getProtocolHandler(value(arg));
             return true;
         }
+        if (arg.startsWith("-result:")) {
+            outputFile = value(arg);
+            return true;
+        }
         if (arg.startsWith("-csv:")) {
-            outputCsvFile = value(arg);
+            System.err.println("Argument -csv:filename has been depracated by -result:filename");
+            outputFile = value(arg);
+            return true;
+        }
+        if (arg.startsWith("-stat:")) {
+            statBufferSize = Integer.parseInt(value(arg));
             return true;
         }
 
@@ -103,10 +116,20 @@ public class AbstractCaptureProcessor<T> {
 
 
     protected LatencyCollector createLatencyCollector(ByteSequence2LongMap timestampMap) throws IOException {
-        return new ChainedLatencyCollector(
-                new StatLatencyCollector(100, timestampMap),
-                CaptureSettings.DUMP_TIMESTAMPS ? new CsvFileLatencyCollector2(outputCsvFile) : new CsvFileLatencyCollector(outputCsvFile)
-        );
+        List<LatencyCollector> result = new ArrayList<>();
+        if (statBufferSize > 0)
+            result.add(new StatLatencyCollector(statBufferSize, timestampMap));
+
+        if (outputFile.toLowerCase().endsWith(".csv")) {
+            if (CaptureSettings.DUMP_TIMESTAMPS)
+                result.add(new CsvFileLatencyCollector2(outputFile));
+            else
+                result.add(new CsvFileLatencyCollector(outputFile));
+        } else {
+            result.add(new BinaryFileLatencyCollector(outputFile));
+        }
+
+        return new ChainedLatencyCollector(result.toArray(new LatencyCollector[0]));
     }
 
     LatencyMeterPacketHandler<T> createLatencyMeterPacketHandler (final LatencyCollector latencyCollector, final ByteSequence2LongMap timestampMap) {
