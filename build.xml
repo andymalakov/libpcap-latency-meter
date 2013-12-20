@@ -20,7 +20,7 @@
   <property name="lib"            location="lib"/>
   <property name="source"         location="src/main/java"/>
   <property name="classesdir"     location="target/classes"/>
-  <property name="testsource"     location="src/main/java"/>
+  <property name="testsource"     location="src/test/java"/>
   <property name="testclassesdir" location="target/test-classes"/>
 
   <target name="build" depends="init,compile,jar" description="Full build"/>
@@ -56,6 +56,7 @@
 
     <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" failonerror="true">
         <classpath>
+			<pathelement location="${classesdir}"/>
             <pathelement location="${lib}/jnetpcap.jar"/>
             <pathelement location="${lib}/junit.jar"/>
         </classpath>

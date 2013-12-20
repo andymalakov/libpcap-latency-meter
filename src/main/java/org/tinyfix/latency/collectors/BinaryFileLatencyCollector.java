@@ -4,6 +4,7 @@ import org.tinyfix.latency.common.CaptureSettings;
 import org.tinyfix.latency.util.TimeOfDayFormatter;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Date;
 
 public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
@@ -52,19 +53,22 @@ public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
                 ((long)(readBuffer[offset+4] & 255) << 24) +
                 ((readBuffer[offset+5] & 255) << 16) +
                 ((readBuffer[offset+6] & 255) <<  8) +
-                ((readBuffer[offset+7] & 255) <<  0));
+                ((readBuffer[offset+7] & 255)));
     }
 
-    public static void main (String ...args) throws IOException {
-        String inputFile = args[0];
-        String outputFile = args[1];
+    public static void main (String ...args) throws Exception {
+        final String inputFile = args[0];
+        final String outputFile = args[1];
+
+        final int numberOfPoints = (args.length > 2) ? Integer.parseInt(args[2]) : 0;
+        final int [] sortedLatencies = (numberOfPoints > 0) ? new int [numberOfPoints] : null;
 
         final char [] timestampBuffer = new char [TimeOfDayFormatter.FORMAT_LENGTH];
         final byte [] correlationIdBuffer = new byte [256 + 2*SIZE_OF_INT];
         final InputStream is = new FileInputStream(inputFile);
         final PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(outputFile), 8192));
 
-        int signalCount = 1;
+        int signalCount = 0;
         try {
             while (true) {
                 int signalLength = is.read();
@@ -72,9 +76,9 @@ public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
                     break; // EOF
                 int totalRowSize = signalLength + 2*SIZE_OF_INT;
                 int bytesRead = is.read(correlationIdBuffer, 0 , totalRowSize);
-                if (bytesRead != totalRowSize)
-                    throw new IOException("Unexpected EOF while reading signal " + signalCount);
-
+                if (bytesRead != totalRowSize) {
+                    System.out.println("Unexpected EOF while reading signal #" + (signalCount+1));
+                }
 
                 long timestamp = readLong(correlationIdBuffer, signalLength);
                 long latency = readLong(correlationIdBuffer, signalLength + SIZE_OF_INT);
@@ -87,12 +91,36 @@ public class BinaryFileLatencyCollector extends OutputStreamLatencyRecorder {
                 writer.print(',');
                 writer.print(latency);
                 writer.print('\n');
+
+
+                if (sortedLatencies != null) {
+                    if (latency > Integer.MAX_VALUE)
+                        throw new Exception("Latency value exceeds INT32: " + latency);
+                    sortedLatencies[signalCount] = (int)latency;
+                }
+
                 signalCount++;
             }
         } finally {
             is.close();
             writer.close();
+
         }
+
+        if (sortedLatencies != null && signalCount > 0) {
+
+            System.out.println("Sorting " + signalCount + " results");
+            Arrays.sort(sortedLatencies, 0, signalCount);
+            System.out.println("MIN: " + sortedLatencies[0]);
+            System.out.println("MAX: " + sortedLatencies[signalCount-1]);
+            System.out.println("MEDIAN: " + sortedLatencies[signalCount/2]);
+
+            System.out.println("99.000%: " + sortedLatencies[ (int)   (99L*signalCount/100)]);
+            System.out.println("99.900%: " + sortedLatencies[ (int)  (999L*signalCount/1000)]);
+            System.out.println("99.990%: " + sortedLatencies[ (int) (9999L*signalCount/10000)]);
+            System.out.println("99.999%: " + sortedLatencies[ (int)(99999L*signalCount/100000)]);
+        }
+
 
     }
 }
