@@ -40,7 +40,6 @@
     <delete failonerror="no">
        <fileset dir="${classesdir}" includes="**/*.class"/>
        <fileset dir="${testclassesdir}" includes="**/*.class"/>
-       <fileset dir="${docsdir}/apidoc"/>
        <fileset dir="target/*.jar"/>
     </delete>
   </target> <!-- clean -->
@@ -48,17 +47,17 @@
   <target name="compile" depends="init" description="Compiles sources">
     <echo>Compiling all Java files from ${source} into ${classesdir}</echo>
 
-    <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" failonerror="true">
+    <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
         <classpath>
             <pathelement location="${lib}/jnetpcap.jar"/>
         </classpath>
     </javac>
 
-    <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" failonerror="true">
+    <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
         <classpath>
 			<pathelement location="${classesdir}"/>
             <pathelement location="${lib}/jnetpcap.jar"/>
-            <pathelement location="${lib}/junit.jar"/>
+            <pathelement location="${lib}/junit-4.7.jar"/>
         </classpath>
     </javac>
 
