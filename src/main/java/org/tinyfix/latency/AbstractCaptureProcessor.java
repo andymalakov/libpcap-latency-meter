@@ -42,6 +42,7 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("COMMAND LINE ARGUMENTS:");
         System.out.println("\t-in:<protocol-handler>\t- Specifies inbound protocol handler. For example: -in:timebase ");
         System.out.println("\t-out:<protocol-handler>\t- Specifies outbound protocol handler. For example: -out:fix:299");
+        System.out.println("\t-dir:<port1>:<port2>\t- When specified helps determine packet direction (otherwise direction is determined relative to host)");
         System.out.println("\t-csv:filename\t- Specifies file name of output file will latencies stats. [Optional]");
         System.out.println("\t-stat:N\t- Specifies number of outbound signal signals to display console progress. [Optional]");
     }
@@ -102,8 +103,10 @@ public class AbstractCaptureProcessor<T> {
             }
         });
 
+
+        LatencyMeterPacketHandler<T> handler = createLatencyMeterPacketHandler(latencyCollector, timestampMap);
         try {
-            pcap.loop(-1, createLatencyMeterPacketHandler(latencyCollector, timestampMap), null);
+            pcap.loop(-1, handler, null);
         } finally {
             pcap.close();
             latencyCollector.close();
@@ -129,7 +132,7 @@ public class AbstractCaptureProcessor<T> {
             result.add(new BinaryFileLatencyCollector(outputFile));
         }
 
-        return new ChainedLatencyCollector(result.toArray(new LatencyCollector[0]));
+        return new ChainedLatencyCollector(result.toArray(new LatencyCollector[result.size()]));
     }
 
     LatencyMeterPacketHandler<T> createLatencyMeterPacketHandler (final LatencyCollector latencyCollector, final ByteSequence2LongMap timestampMap) {
