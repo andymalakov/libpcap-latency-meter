@@ -46,7 +46,7 @@ class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
         }
 
         int j = 0;
-        final int cnt = len + start - 1;
+        final int cnt = len + start;
         for (int i = start; i < cnt; i++) {
 
             final byte b = packet.getByte(i);
