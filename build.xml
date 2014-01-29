@@ -72,6 +72,23 @@
     </jar>
   </target> <!-- jar -->
 
+	<target name="src" description="Builds source package">
+    <zip destfile="target\fix-latency-meter-0.1.RC1.sources.zip">
+        <fileset dir=".">
+            <include name="bin/**/*.cmd"/>
+            <include name="lib/**/*.jar"/>
+            <include name="**/*.java"/>
+						<include name="**/*.xml"/>
+						<include name="fix-latency-meter*.*"/>
+						<include name="COPYING"/>
+						<include name="COPYING.LESSER"/>
+						<include name="NOTICE"/>
+						<include name="README.md"/>
+        </fileset>
+    </zip>
+  </target> <!-- jar -->
+
+	
   <target name="test" depends="compile" description="Run test">
     <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
 			<arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
