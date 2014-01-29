@@ -1,8 +1,7 @@
 package org.tinyfix.latency.collectors;
 
-import org.tinyfix.latency.util.TimeOfDayFormatter;
-
-import java.io.*;
+import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.util.Arrays;
 
 public class StatProcessor {
@@ -45,6 +44,7 @@ public class StatProcessor {
             System.out.println("99.990%: " + sortedLatencies[ (int) (9999L*signalCount/10000)]);
             System.out.println("99.999%: " + sortedLatencies[ (int)(99999L*signalCount/100000)]);
             System.out.println("99.9999%: " + sortedLatencies[ (int)(999999L*signalCount/1000000)]);
+            System.out.println("99.99999%:" + sortedLatencies[ (int)(9999999L*signalCount/10000000)]);
         }
 
 
