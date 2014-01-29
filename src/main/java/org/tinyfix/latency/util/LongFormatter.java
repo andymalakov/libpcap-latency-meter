@@ -4,6 +4,9 @@ import java.util.Arrays;
 
 /** java.lang.Long.toString(long) adapted to byte[] output. Output is padded with leading spaces. */
 public class LongFormatter {
+
+    public static int WIDTH = 20;
+
     private static final byte [] Digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     final static byte [] DigitTens = {
@@ -59,7 +62,7 @@ public class LongFormatter {
 
 
             //final int stringSize = (value < 0) ? stringSize(-value) + 1 : stringSize(value);
-            final int stringSize = 20;
+            final int stringSize = WIDTH;
             {
                 Arrays.fill(buffer, offset, offset+stringSize, (byte)' ');
             }
