@@ -1,5 +1,7 @@
 package org.tinyfix.latency.protocols;
 
+import com.marketfactory.api.MarketFactoryQuoteIdExtractor;
+
 /**
  * Registry of payload protocol handlers
  */
@@ -7,6 +9,8 @@ public class ProtocolHandlers {
 
     private static final String FIX_KEY = "fix:";
     private static final String TIMEBASE_KEY = "timebase";
+//    private static final String MARKETFACTORY_KEY = "mf";
+    private static final String TB_PLAYBACK_KEY = "tbplayback";
 
     public static <T> ProtocolHandlerFactory<T> getProtocolHandler(final String key) {
         if (key.startsWith(FIX_KEY)) {
@@ -30,6 +34,26 @@ public class ProtocolHandlers {
                 }
             };
 
+        }
+//        if (key.equals(MARKETFACTORY_KEY)) {
+//            return new ProtocolHandlerFactory<T>() {
+//                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
+//                    return new MarketFactoryQuoteIdExtractor<>(listener);
+//                }
+//                public String toString() {
+//                    return "MarketFactory Data (BETA)";
+//                }
+//            };
+//        }
+        if (key.equals(TB_PLAYBACK_KEY)) {
+            return new ProtocolHandlerFactory<T>() {
+                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
+                    return new TBPlayerCorrelationIdExtractor<>(listener);
+                }
+                public String toString() {
+                    return "TimeBase Playback";
+                }
+            };
         }
         throw new IllegalArgumentException("Unsupported protocol handler: \"" + key + '"');
     }
