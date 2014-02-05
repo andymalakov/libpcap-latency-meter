@@ -51,6 +51,8 @@
     <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
         <classpath>
             <pathelement location="${lib}/jnetpcap.jar"/>
+			<pathelement location="${lib}/mf/MFAPI.jar"/>
+			<pathelement location="${lib}/mf/MFMessaging.jar"/>
         </classpath>
     </javac>
 
@@ -59,6 +61,8 @@
 			<pathelement location="${classesdir}"/>
             <pathelement location="${lib}/jnetpcap.jar"/>
             <pathelement location="${lib}/junit-4.7.jar"/>
+			<pathelement location="${lib}/mf/MFAPI.jar"/>
+			<pathelement location="${lib}/mf/MFMessaging.jar"/>
         </classpath>
     </javac>
 
@@ -78,26 +82,25 @@
             <include name="bin/**/*.cmd"/>
             <include name="lib/**/*.jar"/>
             <include name="**/*.java"/>
-						<include name="**/*.xml"/>
-						<include name="fix-latency-meter*.*"/>
-						<include name="COPYING"/>
-						<include name="COPYING.LESSER"/>
-						<include name="NOTICE"/>
-						<include name="README.md"/>
+			<include name="**/*.xml"/>
+			<include name="fix-latency-meter*.*"/>
+			<include name="COPYING"/>
+			<include name="COPYING.LESSER"/>
+			<include name="NOTICE"/>
+			<include name="README.md"/>
         </fileset>
     </zip>
   </target> <!-- jar -->
-
 	
   <target name="test" depends="compile" description="Run test">
     <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
-			<arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
-			<classpath>
-				<pathelement location="${lib}/jnetpcap.jar"/>
-				<pathelement location="${lib}/mf/MFAPI.jar"/>
-				<pathelement location="${lib}/mf/MFMessaging.jar"/>
-				<pathelement path="${classesdir}"/>
-			</classpath>
+		<arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
+		<classpath>
+			<pathelement location="${lib}/jnetpcap.jar"/>
+			<pathelement location="${lib}/mf/MFAPI.jar"/>
+			<pathelement location="${lib}/mf/MFMessaging.jar"/>
+			<pathelement path="${classesdir}"/>
+		</classpath>
     </java>
   </target> <!-- jar -->
 </project>
