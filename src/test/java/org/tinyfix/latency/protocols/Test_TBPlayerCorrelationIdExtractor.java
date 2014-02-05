@@ -1,27 +1,18 @@
 package org.tinyfix.latency.protocols;
 
 
-import org.jnetpcap.JCaptureHeader;
 import org.jnetpcap.packet.JPacket;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-
-/**
- * @author Andy
- *         Date: 1/27/14
- */
 public class Test_TBPlayerCorrelationIdExtractor {
 
-    private static Random rnd = new Random(13123); //System.currentTimeMillis());
-
     private final StringBuilder lastCorrelationId = new StringBuilder();
+
     private final CorrelationIdListener correlationIdListener = new CorrelationIdListener () {
 
         @Override
@@ -54,7 +45,7 @@ public class Test_TBPlayerCorrelationIdExtractor {
             for (int b=0; b<8; b++) {
                 buf[i] |= (byte) mask;
 
-                long expected = getBigEndianLong(buf);
+                long expected = TestHelper.getBigEndianLong(buf);
                 assertEncoding(expected);
 
                 mask = mask << 1;
@@ -71,7 +62,7 @@ public class Test_TBPlayerCorrelationIdExtractor {
             for (int b=0; b<8; b++) {
                 buf[i] = (byte) mask;
 
-                long expected = getBigEndianLong (buf);
+                long expected = TestHelper.getBigEndianLong(buf);
                 assertEncoding(expected);
 
                 mask = mask << 1;
@@ -120,7 +111,7 @@ public class Test_TBPlayerCorrelationIdExtractor {
         if (lastCorrelationId.length() == 0)
             Assert.fail ("Failed to find correlation ID");
         long actualCorrelationId = Long.parseLong(lastCorrelationId.toString());
-        String diagnostic = "Incorrect processing of " + Long.toHexString(expectedValue) + " in buffer {" + dump(packet.payload) + "}\n";
+        String diagnostic = "Incorrect processing of " + Long.toHexString(expectedValue) + " in buffer {" + TestHelper.dump(packet.payload) + "}\n";
         Assert.assertEquals(diagnostic, expectedValue, actualCorrelationId);
     }
 
@@ -131,112 +122,20 @@ public class Test_TBPlayerCorrelationIdExtractor {
 
         // skip header
         baos.write(TBPlayerCorrelationIdExtractor.MAGIC);
-        writeLong(valueBuffer, 0, 12121212L);
+        TestHelper.writeLong(valueBuffer, 0, 12121212L);
         baos.write(valueBuffer, 0, 8);
 
-        storeNoise(baos, headerLength); // store header
+        TestHelper.storeNoise(baos, headerLength); // store header
 
         baos.write(TBPlayerCorrelationIdExtractor.MAGIC);
-        writeLong(valueBuffer, 0, value);
+        TestHelper.writeLong(valueBuffer, 0, value);
         baos.write(valueBuffer, 0, 8);
 
-        storeNoise(baos, footerLength); // store footer
+        TestHelper.storeNoise(baos, footerLength); // store footer
         baos.close();
-        JTestPacket packet = new JTestPacket(baos.toByteArray());
-        return packet;
-    }
-
-    private static void storeNoise(ByteArrayOutputStream baos, int len) throws IOException {
-        byte [] noise = new byte[len];
-        rnd.nextBytes(noise);
-        baos.write(noise);
+        return new JTestPacket(baos.toByteArray());
     }
 
 
-    private static class JTestPacket extends JPacket {
 
-        private final byte [] payload;
-        private final int offset = 0;
-
-        public JTestPacket(byte [] payload) {
-            super(Type.POINTER);
-            this.payload = payload;
-        }
-
-        @Override
-        public byte getByte(int index) {
-            return payload[offset + index];
-        }
-
-        @Override
-        public JCaptureHeader getCaptureHeader() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getTotalSize() {
-            throw new UnsupportedOperationException();
-        }
-
-        public int getOffset() {
-            return 3+8;
-        }
-
-        public int getLength() {
-            return payload.length;
-        }
-    }
-
-
-    // From DataExchangeUtils:
-
-    private static void  	writeLong (byte [] bytes, int offset, long l) {
-        b (bytes, offset, l >>> 56);
-        b (bytes, offset + 1, l >>> 48);
-        b (bytes, offset + 2, l >>> 40);
-        b (bytes, offset + 3, l >>> 32);
-        b (bytes, offset + 4, l >>> 24);
-        b (bytes, offset + 5, l >>> 16);
-        b (bytes, offset + 6, l >>> 8);
-        b (bytes, offset + 7, l);
-    }
-
-    private static void		b (byte [] bytes, int offset, long byt) {
-        bytes [offset] = (byte) (byt & 0xFF);
-    }
-
-    private static long      getBigEndianLong (byte [] bytes) {
-        long result =
-                (0xFF & bytes[7])         +
-                        ((0xFF & bytes[6])  <<  8) +
-                        ((0xFF & bytes[5])  << 16) +
-                        ((0xFFL & bytes[4]) << 24) +
-                        ((0xFFL & bytes[3]) << 32) +
-                        ((0xFFL & bytes[2]) << 40) +
-                        ((0xFFL & bytes[1]) << 48) +
-                        ((0xFFL & bytes[0]) << 56);
-
-        return result;
-    }
-
-    /**
-     * dump byte [] as StringBuilder  "0x00, ..., 0xFF"
-     */
-    public static StringBuilder dump(byte[] bytes) {
-        if (bytes == null) throw new IllegalArgumentException("null bytes");
-        return dump (bytes, 0, bytes.length);
-    }
-
-    public static StringBuilder dump(byte[] bytes, int offset, int length) {
-        if (bytes == null) throw new IllegalArgumentException("null bytes");
-
-        StringBuilder sbuf = new StringBuilder();
-        int i, cnt = offset + length;
-        for (i = offset; i < cnt; i++) {
-            if (i > offset)
-                sbuf.append(", ");
-            sbuf.append("(byte)0x" + Integer.toHexString(((int) bytes[i]) & 0xFF).toUpperCase());
-        }
-        return sbuf;
-    }
 }
