@@ -31,37 +31,44 @@ class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
     public void parse(JPacket packet, int start, int len, T cookie) {
         //TODO: Support the case when FIX messages are split between several TCP packets (MTU < FIX message size)
 
-        assert len > 0;
-        if (len < FULL_BEGIN_STRING_LENGTH && !AsciiUtils.equals(packet, BEGIN_STRING_PREFIX, start, BEGIN_STRING_PREFIX_LEN)) {
-            return;
-        }
+        try {
 
-        int j = 0;
-        int currentIdIndex = 0;
-        final int cnt = len + start - 1;
-        for (int i = start + FULL_BEGIN_STRING_LENGTH; i < cnt; i++) {
-            final byte b = packet.getByte(i);
-            if (currentIdIndex != 0) {
-                if (b == SOH) {
-                    //System.out.println("OUT> " +new String (correlationIdBuffer, 0, i - currentIdIndex));
-                    listener.onCorrelationId(packet, correlationIdBuffer, 0, i - currentIdIndex);
-                    currentIdIndex = 0;
-                    j = 0;
-                } else {
-                    if (j == CaptureSettings.MAX_CORRELATION_ID_LENGTH)
-                        throw new ParseException("Correlation ID value length exceed maximum allowed (" + CaptureSettings.MAX_CORRELATION_ID_LENGTH + ')');
-                    correlationIdBuffer[j++] = b;
-                }
-            } else {
-                if (b == correlationPrefix[j]) {
-                    if (++j == correlationPrefixLength) {
-                        currentIdIndex = i + 1;
+            assert len > 0;
+            if (len < FULL_BEGIN_STRING_LENGTH || !AsciiUtils.equals(packet, BEGIN_STRING_PREFIX, start, BEGIN_STRING_PREFIX_LEN)) {
+                return;
+            }
+
+            int j = 0;
+            int currentIdIndex = 0;
+            final int cnt = len + start - 1;
+            for (int i = start + FULL_BEGIN_STRING_LENGTH; i < cnt; i++) {
+                final byte b = packet.getByte(i);
+                if (currentIdIndex != 0) {
+                    if (b == SOH) {
+                        //System.out.println("OUT> " +new String (correlationIdBuffer, 0, i - currentIdIndex));
+                        listener.onCorrelationId(packet, correlationIdBuffer, 0, i - currentIdIndex);
+                        currentIdIndex = 0;
                         j = 0;
+                    } else {
+                        if (j == CaptureSettings.MAX_CORRELATION_ID_LENGTH)
+                            throw new ParseException("Correlation ID value length exceed maximum allowed (" + CaptureSettings.MAX_CORRELATION_ID_LENGTH + ')');
+                        correlationIdBuffer[j++] = b;
                     }
                 } else {
-                    j = 0;
+                    if (b == correlationPrefix[j]) {
+                        if (++j == correlationPrefixLength) {
+                            currentIdIndex = i + 1;
+                            j = 0;
+                        }
+                    } else {
+                        j = 0;
+                    }
                 }
             }
+        } catch (Throwable e) {
+            System.err.println("Error parsing packet #" + packet.getFrameNumber() + ": " + e.getMessage());
+            //e.printStackTrace();
         }
+
     }
 }
