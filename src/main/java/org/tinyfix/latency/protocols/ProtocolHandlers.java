@@ -9,7 +9,7 @@ public class ProtocolHandlers {
 
     private static final String FIX_KEY = "fix:";
     private static final String TIMEBASE_KEY = "timebase";
-//    private static final String MARKETFACTORY_KEY = "mf";
+    private static final String MARKETFACTORY_KEY = "mf";
     private static final String TB_PLAYBACK_KEY = "tbplayback";
 
     public static <T> ProtocolHandlerFactory<T> getProtocolHandler(final String key) {
@@ -23,7 +23,7 @@ public class ProtocolHandlers {
                     return "FIX Protocol (tag " + key.substring(FIX_KEY.length()) + ')';
                 }
             };
-        }
+        } else
         if (key.equals(TIMEBASE_KEY)) {
             return new ProtocolHandlerFactory<T>() {
                 public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
@@ -34,17 +34,17 @@ public class ProtocolHandlers {
                 }
             };
 
-        }
-//        if (key.equals(MARKETFACTORY_KEY)) {
-//            return new ProtocolHandlerFactory<T>() {
-//                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-//                    return new MarketFactoryQuoteIdExtractor<>(listener);
-//                }
-//                public String toString() {
-//                    return "MarketFactory Data (BETA)";
-//                }
-//            };
-//        }
+        } else
+        if (key.equals(MARKETFACTORY_KEY)) {
+            return new ProtocolHandlerFactory<T>() {
+                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
+                    return new MarketFactoryQuoteIdExtractor<>(listener);
+                }
+                public String toString() {
+                    return "MarketFactory Data (BETA)";
+                }
+            };
+        } else
         if (key.equals(TB_PLAYBACK_KEY)) {
             return new ProtocolHandlerFactory<T>() {
                 public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
