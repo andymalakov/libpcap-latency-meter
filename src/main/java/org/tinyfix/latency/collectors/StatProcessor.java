@@ -38,7 +38,7 @@ public class StatProcessor {
 
         if (signalCount > 0) {
 
-            System.out.println("Sorting " + signalCount + " results (from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + ")");
+            System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " (microseconds)");
             Arrays.sort(sortedLatencies, 0, signalCount);
             System.out.println("MIN: " + sortedLatencies[0]);
             System.out.println("MAX: " + sortedLatencies[signalCount-1]);
