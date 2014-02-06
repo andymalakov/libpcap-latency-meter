@@ -9,7 +9,7 @@ public class ProtocolHandlers {
 
     private static final String FIX_KEY = "fix:";
     private static final String TIMEBASE_KEY = "timebase";
-    private static final String MARKETFACTORY_KEY = "mf";
+    private static final String MARKET_FACTORY_KEY = "mf";
     private static final String TB_PLAYBACK_KEY = "tbplayback";
 
     public static <T> ProtocolHandlerFactory<T> getProtocolHandler(final String key) {
@@ -35,13 +35,13 @@ public class ProtocolHandlers {
             };
 
         } else
-        if (key.equals(MARKETFACTORY_KEY)) {
+        if (key.equals(MARKET_FACTORY_KEY)) {
             return new ProtocolHandlerFactory<T>() {
                 public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
                     return new MarketFactoryQuoteIdExtractor<>(listener);
                 }
                 public String toString() {
-                    return "MarketFactory Data (BETA)";
+                    return "MarketFactory Data";
                 }
             };
         } else

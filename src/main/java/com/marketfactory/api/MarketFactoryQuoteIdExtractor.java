@@ -9,11 +9,11 @@ import org.tinyfix.latency.util.LongFormatter;
 public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
 
     private final CorrelationIdListener listener;
-    private final int bufferSize = 64*1024;  // Should be larger than MTU
+    private final int bufferSize = 8*1024;  // Should be larger than MTU
     private final ProtoByteBuffer buffer = new ProtoByteBuffer(bufferSize, true);
-    private final byte[] overflowBuffer = new byte[1024];  // handles messages split between packets
+    private final byte[] overflowBuffer = new byte[2*1024];  // handles messages split between packets
     private int overflowSize;
-
+    private volatile int carryOverPacketsCounter;
     private final byte [] formattedNumber = new byte [LongFormatter.WIDTH];
 
     public MarketFactoryQuoteIdExtractor(CorrelationIdListener listener) {
@@ -24,20 +24,15 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
     public void parse(JPacket packet, int start, int len, T cookie) {
         synchronized (overflowBuffer) {
             try {
-
                 fillProtoBuffer(packet, start, len);
 
                 while (buffer.remaining() > 0) {
-
-                    if (carryOverMessageIfNecessary())
-                        break;
-
                     if (processSingleMktMessage(packet))
                         break;
                 }
             } catch (Throwable e) {
                 System.err.println("Error parsing packet #" + packet.getFrameNumber() + ": " + e.getMessage());
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
@@ -57,34 +52,33 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
     }
 
     /** @return true if we want to skip further processing of the packet */
-    private boolean carryOverMessageIfNecessary() {
-        assert Thread.holdsLock(overflowBuffer);
-
-        final int remainingBytes = buffer.remaining();
-        buffer.byteBuffer.mark();
-        int msgLen = (buffer.byteBuffer.getShort() & 0xFFFF);
-        buffer.byteBuffer.reset();
-
-        if (remainingBytes < msgLen) {
-            if (overflowBuffer.length < remainingBytes)
-                throw new RuntimeException("Overflow exceeds max: " + remainingBytes + " bytes to carry over. Maximum capacity: " + overflowBuffer.length);
-            assert overflowSize == 0;
-            while (overflowSize < remainingBytes)
-                overflowBuffer[overflowSize++] = buffer.getByte();
-            return true;
-        }
-        return false;
-    }
-
-    /** @return true if we want to skip further processing of the packet */
     private boolean processSingleMktMessage(JPacket packet) {
         assert Thread.holdsLock(overflowBuffer);
 
-
         final int msgStart = buffer.position();
+        final int remainingBytes = buffer.remaining();
         if ( ! buffer.readMessageHeader()) {
-            diagnoseBadMessageHeader();
-            return true;
+            if (remainingBytes < 2) {
+                System.err.println("Buffer is empty");
+            } else {
+                final int msgLen = buffer.msgLen;
+                if (msgLen < 10) {
+                    System.err.println("MsgLen specified in the message is too small: " + msgLen);
+                } else if (msgLen > bufferSize) {
+                    System.err.println("MsgLen specified in the message is too large: " + msgLen);
+                } else if (msgLen > remainingBytes) {
+                    if (overflowBuffer.length < remainingBytes)
+                        throw new RuntimeException("Overflow exceeds max: " + remainingBytes + " bytes to carry over. Maximum capacity: " + overflowBuffer.length);
+                    assert overflowSize == 0;
+                    while (overflowSize < remainingBytes)
+                        overflowBuffer[overflowSize++] = buffer.getByte();
+                    carryOverPacketsCounter++;
+                } else {
+                    System.err.println("Unknown problem: MsgLen " + msgLen);
+                }
+
+            }
+            return true; // we will interrupt packet parsing => no need to restore original position
         }
 
         final int msgLen = buffer.msgLen;
@@ -119,28 +113,6 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
             buffer.getByte();
     }
 
-    private void diagnoseBadMessageHeader() {
-        if (buffer.remaining() < 2) {
-            System.err.println("Buffer is empty");
-        } else {
-
-            buffer.byteBuffer.mark();
-
-            int msgLen = (buffer.byteBuffer.getShort() & 0xFFFF);
-            if (msgLen < 10)
-                System.err.println("MsgLen specified in the message is too small: " + msgLen);
-            else
-            if (msgLen > bufferSize)
-                System.err.println("MsgLen specified in the message is too large: " + msgLen);
-            else
-            if (buffer.remaining() < msgLen)
-                System.err.println("Remaining buffer size (" +  buffer.remaining() +  ") is not enough to read entire message which is supposed to have size " + msgLen );
-            else
-                System.err.println("Unknown problem: MsgLen " + msgLen);
-            buffer.byteBuffer.reset();
-        }
-
-    }
 
 
 }
