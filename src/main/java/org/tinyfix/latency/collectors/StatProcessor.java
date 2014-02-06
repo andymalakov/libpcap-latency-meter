@@ -36,7 +36,7 @@ public class StatProcessor {
             }
         }
 
-        if (sortedLatencies != null && signalCount > 0) {
+        if (signalCount > 0) {
 
             System.out.println("Sorting " + signalCount + " results (from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + ")");
             Arrays.sort(sortedLatencies, 0, signalCount);
@@ -65,23 +65,21 @@ public class StatProcessor {
     }
 
     private static int countNumberOfLines(String filename) throws IOException {
-        InputStream is = new BufferedInputStream(new FileInputStream(filename));
-        try {
+        int count = 0;
+        boolean isEmpty = true;
+
+        try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
             byte[] c = new byte[1024];
-            int count = 0;
-            int readChars = 0;
-            boolean empty = true;
+            int readChars;
             while ((readChars = is.read(c)) != -1) {
-                empty = false;
+                isEmpty = false;
                 for (int i = 0; i < readChars; ++i) {
                     if (c[i] == '\n') {
                         ++count;
                     }
                 }
             }
-            return (count == 0 && !empty) ? 1 : count;
-        } finally {
-            is.close();
         }
+        return (count == 0 && !isEmpty) ? 1 : count;
     }
 }
