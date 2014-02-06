@@ -1,14 +1,17 @@
 package org.tinyfix.latency.collectors;
 
-import java.io.FileReader;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.util.Arrays;
 
 public class StatProcessor {
     public static void main (String ...args) throws Exception {
         final String inputFile = args[0];
-        final int numberOfPoints = Integer.parseInt(args[1]);
-        final int [] sortedLatencies = (numberOfPoints > 0) ? new int [numberOfPoints] : null;
+        final int numberOfPoints = countNumberOfLines(inputFile) + 1;
+        final int [] sortedLatencies = new int [numberOfPoints];
+
+        String firstLine = null;
+        String lastLine = null;
+
 
         int signalCount = 0;
         try (LineNumberReader reader = new LineNumberReader(new FileReader(inputFile))) {
@@ -17,15 +20,17 @@ public class StatProcessor {
                 if (line == null)
                     break; // EOF
 
+                if (firstLine == null)
+                    firstLine = line;
+                lastLine = line;
+
                 int lastComma = line.lastIndexOf(',');
                 long latency = Long.parseLong(line.substring(lastComma+1));
 
 
-                if (sortedLatencies != null) {
-                    if (latency > Integer.MAX_VALUE)
-                        throw new Exception("Latency value exceeds INT32: " + latency);
-                    sortedLatencies[signalCount] = (int)latency;
-                }
+                if (latency > Integer.MAX_VALUE)
+                    throw new Exception("Latency value exceeds INT32: " + latency);
+                sortedLatencies[signalCount] = (int)latency;
 
                 signalCount++;
             }
@@ -33,7 +38,7 @@ public class StatProcessor {
 
         if (sortedLatencies != null && signalCount > 0) {
 
-            System.out.println("Sorting " + signalCount + " results");
+            System.out.println("Sorting " + signalCount + " results (from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + ")");
             Arrays.sort(sortedLatencies, 0, signalCount);
             System.out.println("MIN: " + sortedLatencies[0]);
             System.out.println("MAX: " + sortedLatencies[signalCount-1]);
@@ -48,5 +53,35 @@ public class StatProcessor {
         }
 
 
+    }
+
+    private static String cutTimestamp(String line) {
+        if (line != null) {
+            int commaIndex = line.indexOf(',');
+            if (commaIndex > 0)
+                return line.substring(0, commaIndex);
+        }
+        return  "?";
+    }
+
+    private static int countNumberOfLines(String filename) throws IOException {
+        InputStream is = new BufferedInputStream(new FileInputStream(filename));
+        try {
+            byte[] c = new byte[1024];
+            int count = 0;
+            int readChars = 0;
+            boolean empty = true;
+            while ((readChars = is.read(c)) != -1) {
+                empty = false;
+                for (int i = 0; i < readChars; ++i) {
+                    if (c[i] == '\n') {
+                        ++count;
+                    }
+                }
+            }
+            return (count == 0 && !empty) ? 1 : count;
+        } finally {
+            is.close();
+        }
     }
 }
