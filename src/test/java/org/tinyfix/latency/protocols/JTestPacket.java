@@ -1,8 +1,10 @@
 package org.tinyfix.latency.protocols;
 
 import org.jnetpcap.JCaptureHeader;
+import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.JPacket;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -35,6 +37,22 @@ class JTestPacket extends JPacket {
 
     public int getLength() {
         return payload.length;
+    }
+
+    @Override
+    public int transferTo(JBuffer dst, int srcOffset, int length, int dstOffset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int transferTo(JBuffer dst) {
+        return dst.transferFrom(payload);
+    }
+
+    @Override
+    public int transferTo(ByteBuffer dst, int srcOffset, int length) {
+        dst.put(payload, srcOffset, length);
+        return length;
     }
 
     @Override
