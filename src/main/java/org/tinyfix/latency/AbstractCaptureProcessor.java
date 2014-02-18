@@ -12,12 +12,13 @@ import org.tinyfix.latency.util.ByteSequence2LongMap;
 import org.tinyfix.latency.util.KeyValueRingBuffer;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractCaptureProcessor<T> {
     protected String outputFile = "latencies.csv";
-    protected TcpPacketFilter packetFilter = new HostBasedPacketFilter();
+    protected TcpPacketFilter packetFilter;
     protected ProtocolHandlerFactory<T> inboundHandler;
     protected ProtocolHandlerFactory<T> outboundHandler;
     protected int statBufferSize = 100;
@@ -35,6 +36,11 @@ public class AbstractCaptureProcessor<T> {
                 if ( ! parseCommandLineArgument (arg))
                     throw new IllegalArgumentException ("Unrecognized command line parameter: " + arg);
             }
+
+            // assign defaults
+            if(packetFilter == null) {
+                packetFilter = new HostBasedPacketFilter();
+            }
         }
     }
 
@@ -49,8 +55,17 @@ public class AbstractCaptureProcessor<T> {
 
     protected boolean parseCommandLineArgument (String arg) {
         if (arg.startsWith("-dir:")) {
-            String [] ports = value(arg).split(":");
-            packetFilter = new PortBasedTcpPacketFilter(Integer.parseInt(ports[0]), Integer.parseInt(ports[1]));
+            String value = value(arg);
+            if (value.indexOf(':') > 0) {// looks like ports
+                String [] ports = value.split(":");
+                packetFilter = new PortBasedTcpPacketFilter(Integer.parseInt(ports[0]), Integer.parseInt(ports[1]));
+            } else {
+                try {
+                    packetFilter = new HostBasedPacketFilter(value);
+                } catch (UnknownHostException e) {
+                    throw new IllegalArgumentException("Host specified for -dir parameter is not valid: "+ e.getMessage(), e);
+                }
+            }
             return true;
         }
         if (arg.startsWith("-in:")) {

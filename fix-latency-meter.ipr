@@ -29,8 +29,11 @@
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
   <component name="GradleSettings">
-    <option name="gradleHome" value="$PROJECT_DIR$/../../Development/Gradle/gradle-1.8" />
+    <option name="gradleHome" value="D:/Development/Gradle/gradle-1.8" />
     <option name="preferLocalInstallationToWrapper" value="true" />
   </component>
   <component name="IdProvider" IDEtalkID="3A98FD0A578D35C502790E35F6B88D45" />
@@ -172,8 +175,19 @@
         <root url="file://$PROJECT_DIR$/lib" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$JAVA_THIRD_PARTY$/jnetpcap-1.4.r1425/src/java1.5" />
+      </SOURCES>
       <jarDirectory url="file://$PROJECT_DIR$/lib" recursive="false" />
+    </library>
+    <library name="MarketFactory">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/mf/ListMarkets.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mf/MFAPI.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mf/MFMessaging.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
     </library>
   </component>
 </project>
