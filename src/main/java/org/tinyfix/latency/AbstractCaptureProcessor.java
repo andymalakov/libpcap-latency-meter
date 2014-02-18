@@ -48,7 +48,8 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("COMMAND LINE ARGUMENTS:");
         System.out.println("\t-in:<protocol-handler>\t- Specifies inbound protocol handler. For example: -in:timebase ");
         System.out.println("\t-out:<protocol-handler>\t- Specifies outbound protocol handler. For example: -out:fix:299");
-        System.out.println("\t-dir:<port1>:<port2>\t- When specified helps determine packet direction (otherwise direction is determined relative to host)");
+        System.out.println("\t-dir:<port1>:<port2>\t- When specified helps determine packet direction (otherwise direction is determined relative to local host)");
+        System.out.println("\t-dir:<host> alterative form of packet direction - relative to specified host (the argument can be dnsname or ip address)");
         System.out.println("\t-csv:filename\t- Specifies file name of output file will latencies stats. [Optional]");
         System.out.println("\t-stat:N\t- Specifies number of outbound signal signals to display console progress. [Optional]");
     }
