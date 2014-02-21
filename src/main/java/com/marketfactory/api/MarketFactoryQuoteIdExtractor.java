@@ -85,17 +85,7 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
 
         final IMessage msg = Protocol.getGarbageFreeInstance(buffer.msgType, buffer);
         if(msg != null) {
-            if (msg instanceof MktDataMessage) {
-                MktDataMessage mktDataMessage = (MktDataMessage) msg;
-                //System.out.println("MktDataMessage: " + mktDataMessage);
-                //System.out.println("IN>  " + mktDataMessage.mvd.timeApiServer);
-                LongFormatter.format(mktDataMessage.mvd.timeApiServer, formattedNumber, 0);
-                int offset = 0;
-                while (formattedNumber[offset] == ' ')
-                    offset++;
-
-                listener.onCorrelationId(packet, formattedNumber, offset, formattedNumber.length - offset);
-            }
+            decodeMessage(packet, msg);
         } else {
             System.err.println("MF Decoder: Could not decode MsgLen:" + buffer.msgLen + ", MsgType:" + buffer.msgType);
             buffer.clear();
@@ -106,6 +96,33 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         if (leftover > 0)
             skip(buffer, leftover);
         return false;
+    }
+
+    private void decodeMessage(JPacket packet, IMessage msg) {
+        if (msg instanceof MktDataMessage) {
+            MktDataMessage mktDataMessage = (MktDataMessage) msg;
+            //System.out.println("MktDataMessage: " + mktDataMessage);
+            //System.out.println("IN>  " + mktDataMessage.mvd.timeApiServer);
+            LongFormatter.format(mktDataMessage.mvd.timeApiServer, formattedNumber, 0);
+            int offset = 0;
+            while (formattedNumber[offset] == ' ')
+                offset++;
+
+            listener.onCorrelationId(packet, formattedNumber, offset, formattedNumber.length - offset);
+        }
+        else if (msg instanceof SubmitOrderMessage) {
+            SubmitOrderMessage order = (SubmitOrderMessage) msg;
+            //System.out.println("SubmitOrderMessage: " + msg);
+            //System.out.println("OUT>  " + order.contents.clOrdID);
+            String clOrdId = order.contents.clOrdID;
+            byte [] clOrdIdBytes = clOrdId.getBytes();
+            listener.onCorrelationId(packet, clOrdIdBytes, 0, clOrdIdBytes.length);
+        }
+//        if (msg instanceof RuThereMessage) {
+//            //System.out.println("RuThereMessage: " + msg);
+//        } else {
+//            System.out.println("Other: " + msg.getClass().getSimpleName());
+//        }
     }
 
     private static void skip(ProtoByteBuffer buffer, int leftover) {
