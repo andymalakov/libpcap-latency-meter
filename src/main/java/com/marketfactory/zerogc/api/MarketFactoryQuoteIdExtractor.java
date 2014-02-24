@@ -128,7 +128,7 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
     private int copyAsByteArray(MFString clOrdId, byte[] formattedNumber) {
         final int len = clOrdId.length();
         for (int i=0; i < len; i++)
-            formattedNumber[i] = (byte) clOrdId.charAt(0);
+            formattedNumber[i] = (byte) clOrdId.charAt(i);
         return len;
     }
 
