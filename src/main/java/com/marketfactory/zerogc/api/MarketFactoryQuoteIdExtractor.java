@@ -1,4 +1,4 @@
-package com.marketfactory.api;  // uses a package-local class com.marketfactory.api.MktDataMessage.
+package com.marketfactory.zerogc.api;  // uses a package-local class com.marketfactory.api.MktDataMessage.
 
 import org.jnetpcap.packet.JPacket;
 import org.tinyfix.latency.protocols.CorrelationIdExtractor;
@@ -6,12 +6,11 @@ import org.tinyfix.latency.protocols.CorrelationIdListener;
 import org.tinyfix.latency.util.LongFormatter;
 
 
-@Deprecated // prior to zero-GC
 public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
 
     private final CorrelationIdListener listener;
     private final int bufferSize = 8*1024;  // Should be larger than MTU
-    private final ProtoByteBuffer buffer = new ProtoByteBuffer(bufferSize, true);
+    private final ZeroGCProtoByteBuffer buffer = new ZeroGCProtoByteBuffer(bufferSize, true);
     private final byte[] overflowBuffer = new byte[2*1024];  // handles messages split between packets
     private int overflowSize;
     private volatile int carryOverPacketsCounter;
@@ -84,7 +83,7 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
 
         final int msgLen = buffer.msgLen;
 
-        final IMessage msg = Protocol.create(buffer.msgType, buffer);  //WAS:  Protocol.getGarbageFreeInstance(buffer.msgType, buffer);
+        final IMessage msg = Protocol.recycleZeroGCInstance(buffer.msgType, buffer);
         if(msg != null) {
             decodeMessage(packet, msg);
         } else {
@@ -115,9 +114,9 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
             SubmitOrderMessage order = (SubmitOrderMessage) msg;
             //System.out.println("SubmitOrderMessage: " + msg);
             //System.out.println("OUT>  " + order.contents.clOrdID);
-            String clOrdId = order.contents.clOrdID;
-            byte [] clOrdIdBytes = clOrdId.getBytes();
-            listener.onCorrelationId(packet, clOrdIdBytes, 0, clOrdIdBytes.length);
+            MFString clOrdId = order.contents.clOrdID;
+            int len = copyAsByteArray(clOrdId, formattedNumber);
+            listener.onCorrelationId(packet, formattedNumber, 0, len);
         }
 //        if (msg instanceof RuThereMessage) {
 //            //System.out.println("RuThereMessage: " + msg);
@@ -126,7 +125,14 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
 //        }
     }
 
-    private static void skip(ProtoByteBuffer buffer, int leftover) {
+    private int copyAsByteArray(MFString clOrdId, byte[] formattedNumber) {
+        final int len = clOrdId.length();
+        for (int i=0; i < len; i++)
+            formattedNumber[i] = (byte) clOrdId.charAt(0);
+        return len;
+    }
+
+    private static void skip(ZeroGCProtoByteBuffer buffer, int leftover) {
         for (int i=0; i < leftover; i++)
             buffer.getByte();
     }

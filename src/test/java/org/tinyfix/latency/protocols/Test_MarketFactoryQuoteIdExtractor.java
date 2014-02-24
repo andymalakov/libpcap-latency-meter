@@ -1,6 +1,6 @@
 package org.tinyfix.latency.protocols;
 
-import com.marketfactory.api.MarketFactoryQuoteIdExtractor;
+import com.marketfactory.zerogc.api.MarketFactoryQuoteIdExtractor;
 import org.jnetpcap.packet.JPacket;
 import org.junit.Assert;
 import org.junit.Test;

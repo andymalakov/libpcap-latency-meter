@@ -1,6 +1,6 @@
 package org.tinyfix.latency.protocols;
 
-import com.marketfactory.api.MarketFactoryQuoteIdExtractor;
+import com.marketfactory.zerogc.api.MarketFactoryQuoteIdExtractor;
 
 /**
  * Registry of payload protocol handlers

@@ -18,8 +18,8 @@
 
   <!-- Sets the basic environment -->
   <property name="lib"            location="lib"/>
-	<property name="bin"            location="bin"/>
-	<property name="data"           location="data"/>
+  <property name="bin"            location="bin"/>
+  <property name="data"           location="data"/>
   <property name="source"         location="src/main/java"/>
   <property name="classesdir"     location="target/classes"/>
   <property name="testsource"     location="src/test/java"/>
@@ -52,7 +52,7 @@
         <classpath>
             <pathelement location="${lib}/jnetpcap.jar"/>
 			<pathelement location="${lib}/mf/MFAPI.jar"/>
-			<pathelement location="${lib}/mf/MFMessaging.jar"/>
+            <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
         </classpath>
     </javac>
 
@@ -62,7 +62,7 @@
             <pathelement location="${lib}/jnetpcap.jar"/>
             <pathelement location="${lib}/junit-4.7.jar"/>
 			<pathelement location="${lib}/mf/MFAPI.jar"/>
-			<pathelement location="${lib}/mf/MFMessaging.jar"/>
+			<pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
         </classpath>
     </javac>
 
@@ -98,7 +98,7 @@
 		<classpath>
 			<pathelement location="${lib}/jnetpcap.jar"/>
 			<pathelement location="${lib}/mf/MFAPI.jar"/>
-			<pathelement location="${lib}/mf/MFMessaging.jar"/>
+            <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
 			<pathelement path="${classesdir}"/>
 		</classpath>
     </java>

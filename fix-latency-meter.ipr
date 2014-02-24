@@ -182,9 +182,8 @@
     </library>
     <library name="MarketFactory">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/mf/ListMarkets.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mf/MFAPI-zerogc.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mf/MFAPI.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mf/MFMessaging.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
