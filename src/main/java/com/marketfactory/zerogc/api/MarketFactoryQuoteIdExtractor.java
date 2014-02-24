@@ -102,7 +102,6 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         if (msg instanceof MktDataMessage) {
             MktDataMessage mktDataMessage = (MktDataMessage) msg;
             //System.out.println("MktDataMessage: " + mktDataMessage);
-            //System.out.println("IN>  " + mktDataMessage.mvd.timeApiServer);
             LongFormatter.format(mktDataMessage.mvd.timeApiServer, formattedNumber, 0);
             int offset = 0;
             while (formattedNumber[offset] == ' ')
@@ -113,7 +112,6 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         else if (msg instanceof SubmitOrderMessage) {
             SubmitOrderMessage order = (SubmitOrderMessage) msg;
             //System.out.println("SubmitOrderMessage: " + msg);
-            //System.out.println("OUT>  " + order.contents.clOrdID);
             MFString clOrdId = order.contents.clOrdID;
             int len = copyAsByteArray(clOrdId, formattedNumber);
             listener.onCorrelationId(packet, formattedNumber, 0, len);

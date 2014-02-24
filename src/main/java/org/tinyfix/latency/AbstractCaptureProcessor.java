@@ -4,10 +4,7 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.JPacket;
 import org.tinyfix.latency.collectors.*;
 import org.tinyfix.latency.common.CaptureSettings;
-import org.tinyfix.latency.protocols.CorrelationIdExtractor;
-import org.tinyfix.latency.protocols.CorrelationIdListener;
-import org.tinyfix.latency.protocols.ProtocolHandlerFactory;
-import org.tinyfix.latency.protocols.ProtocolHandlers;
+import org.tinyfix.latency.protocols.*;
 import org.tinyfix.latency.util.ByteSequence2LongMap;
 import org.tinyfix.latency.util.KeyValueRingBuffer;
 
@@ -22,6 +19,7 @@ public class AbstractCaptureProcessor<T> {
     protected ProtocolHandlerFactory<T> inboundHandler;
     protected ProtocolHandlerFactory<T> outboundHandler;
     protected int statBufferSize = 100;
+    protected boolean isTracingMode = false;
 
     protected void run (String ... args) throws Exception {
         parse(args);
@@ -52,6 +50,7 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("\t-dir:<host> alterative form of packet direction - relative to specified host (the argument can be dnsname or ip address)");
         System.out.println("\t-csv:filename\t- Specifies file name of output file will latencies stats. [Optional]");
         System.out.println("\t-stat:N\t- Specifies number of outbound signal signals to display console progress. [Optional]");
+        System.out.println("\t-trace\t- Traces all discovered inbound and outbound signals. [Slow]");
     }
 
     protected boolean parseCommandLineArgument (String arg) {
@@ -90,6 +89,10 @@ public class AbstractCaptureProcessor<T> {
             statBufferSize = Integer.parseInt(value(arg));
             return true;
         }
+        if (arg.startsWith("-trace")) {
+            isTracingMode = true;
+            return true;
+        }
 
         return false;
     }
@@ -104,6 +107,7 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("Inbound signals buffer size: " + CaptureSettings.RING_BUFFER_CAPACITY/1024 + 'K');
         System.out.println("Capture packet snap length: " + CaptureSettings.PACKET_SNAP_LENGTH/1024 + 'K');
         System.out.println("Capture filter network mask: " + CaptureSettings.FILTER_NETWORK_MASK_HEX);
+        System.out.println("Tracing: " + isTracingMode);
 
         final LatencyCollector latencyCollector = createLatencyCollector(timestampMap);
 
@@ -171,6 +175,11 @@ public class AbstractCaptureProcessor<T> {
                 }
             }
         };
+
+        if (isTracingMode) {
+            inboundIdListener =  new TracingCorrelationIdListener("IN>  ", inboundIdListener);
+            outboundIdListener = new TracingCorrelationIdListener("OUT> ", outboundIdListener);
+        }
 
         CorrelationIdExtractor<T> inboundIdExtractor = inboundHandler.create(inboundIdListener);
         CorrelationIdExtractor<T> outboundIdExtractor = outboundHandler.create(outboundIdListener);

@@ -55,7 +55,6 @@ public class TBPlayerCorrelationIdExtractor<T> implements CorrelationIdExtractor
                         }
                         // parse LONG
                         long correlationId = Util.readLong(correlationIdBinary, 0);
-                        //System.out.println("OUT>  " + correlationId);
                         // format as decimal number
                         LongFormatter.format(correlationId, correlationIdFormatted, 0);
                         int offset = trimLeadingSpace(correlationIdFormatted);
@@ -67,7 +66,6 @@ public class TBPlayerCorrelationIdExtractor<T> implements CorrelationIdExtractor
                 }
 
                 magicIndex = 0; // search for the next magic
-                //System.out.println("i=8: " + iii);
                 i += SIZE_OF_LONG;
             }
         }

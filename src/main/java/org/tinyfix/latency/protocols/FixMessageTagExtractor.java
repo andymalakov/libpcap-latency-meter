@@ -45,7 +45,6 @@ class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
                 final byte b = packet.getByte(i);
                 if (currentIdIndex != 0) {
                     if (b == SOH) {
-                        //System.out.println("OUT> " +new String (correlationIdBuffer, 0, i - currentIdIndex));
                         listener.onCorrelationId(packet, correlationIdBuffer, 0, i - currentIdIndex);
                         currentIdIndex = 0;
                         j = 0;
