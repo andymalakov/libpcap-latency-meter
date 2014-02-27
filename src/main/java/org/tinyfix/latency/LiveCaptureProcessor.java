@@ -37,6 +37,14 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
     }
 
     @Override
+    protected void printSelectedSettings() {
+        super.printSelectedSettings();
+        System.out.println("Capture filter: " + captureFilter);
+        System.out.println("Interface#: " + interfaceId);
+    }
+
+
+    @Override
     protected void run(String ... args) throws Exception {
         super.run(args);
 

@@ -111,16 +111,40 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         }
         else if (msg instanceof SubmitOrderMessage) {
             SubmitOrderMessage order = (SubmitOrderMessage) msg;
-            //System.out.println("SubmitOrderMessage: " + msg);
+            //System.out.println("SubmitOrderMessage: " + order.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
             MFString clOrdId = order.contents.clOrdID;
             int len = copyAsByteArray(clOrdId, formattedNumber);
             listener.onCorrelationId(packet, formattedNumber, 0, len);
         }
+        else if (msg instanceof OrderSubmittedMessage) {
+            OrderSubmittedMessage order = (OrderSubmittedMessage) msg;
+            //System.out.println("OrderSubmittedMessage: " + order.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+            MFString clOrdId = order.contents.clOrdID;
+            int len = copyAsByteArray(clOrdId, formattedNumber);
+            listener.onCorrelationId(packet, formattedNumber, 0, len);
+        }
+        else if (msg instanceof OrderRejectedMessage) {
+            OrderRejectedMessage order = (OrderRejectedMessage) msg;
+            //System.out.println("OrderRejectedMessage: " + order.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+            MFString clOrdId = order.contents.clOrdID;
+            int len = copyAsByteArray(clOrdId, formattedNumber);
+            listener.onCorrelationId(packet, formattedNumber, 0, len);
+        }
+        else if (msg instanceof OrderReceivedMessage) {
+            OrderReceivedMessage orderReceived = (OrderReceivedMessage) msg;
+            //System.out.println("OrderReceivedMessage: " + orderReceived.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+            MFString clOrdId = orderReceived.contents.clOrdID;
+            int len = copyAsByteArray(clOrdId, formattedNumber);
+            listener.onCorrelationId(packet, formattedNumber, 0, len);
+//        } else
 //        if (msg instanceof RuThereMessage) {
-//            //System.out.println("RuThereMessage: " + msg);
+//            System.out.println("RuThereMessage: " + msg);
+//        } else
+//        if (msg instanceof HeartbeatMessage) {
+//            System.out.println("HeartbeatMessage: " + msg);
 //        } else {
 //            System.out.println("Other: " + msg.getClass().getSimpleName());
-//        }
+        }
     }
 
     private int copyAsByteArray(MFString clOrdId, byte[] formattedNumber) {

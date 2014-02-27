@@ -41,7 +41,7 @@ public class ProtocolHandlers {
                     return new MarketFactoryQuoteIdExtractor<>(listener);
                 }
                 public String toString() {
-                    return "MarketFactory Data";
+                    return "MarketFactory Data/Trade";
                 }
             };
         } else

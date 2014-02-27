@@ -101,13 +101,8 @@ public class AbstractCaptureProcessor<T> {
 
     protected void runCaptureLoop(final Pcap pcap, final StringBuilder err) throws IOException {
         final ByteSequence2LongMap timestampMap = new KeyValueRingBuffer(CaptureSettings.RING_BUFFER_CAPACITY, CaptureSettings.MAX_CORRELATION_ID_LENGTH); // = new HashMapByteSequence2LongMap(bufferSize);
-        System.out.println("Packet direction filter: " + packetFilter);
-        System.out.println("Inbound packet handler: " + inboundHandler);
-        System.out.println("Outbound packet handler: " + outboundHandler);
-        System.out.println("Inbound signals buffer size: " + CaptureSettings.RING_BUFFER_CAPACITY/1024 + 'K');
-        System.out.println("Capture packet snap length: " + CaptureSettings.PACKET_SNAP_LENGTH/1024 + 'K');
-        System.out.println("Capture filter network mask: " + CaptureSettings.FILTER_NETWORK_MASK_HEX);
-        System.out.println("Tracing: " + isTracingMode);
+
+        printSelectedSettings();
 
         final LatencyCollector latencyCollector = createLatencyCollector(timestampMap);
 
@@ -137,6 +132,15 @@ public class AbstractCaptureProcessor<T> {
             System.err.println(err.toString());
     }
 
+    protected void printSelectedSettings() {
+        System.out.println("Packet direction filter: " + packetFilter);
+        System.out.println("Inbound packet handler: " + inboundHandler);
+        System.out.println("Outbound packet handler: " + outboundHandler);
+        System.out.println("Inbound signals buffer size: " + CaptureSettings.RING_BUFFER_CAPACITY/1024 + 'K');
+        System.out.println("Capture packet snap length: " + CaptureSettings.PACKET_SNAP_LENGTH/1024 + 'K');
+        System.out.println("Capture filter network mask: " + CaptureSettings.FILTER_NETWORK_MASK_HEX);
+        System.out.println("Tracing: " + isTracingMode);
+    }
 
     protected LatencyCollector createLatencyCollector(ByteSequence2LongMap timestampMap) throws IOException {
         List<LatencyCollector> result = new ArrayList<>();
