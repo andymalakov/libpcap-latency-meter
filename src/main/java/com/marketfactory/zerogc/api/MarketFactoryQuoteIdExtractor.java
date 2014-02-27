@@ -7,7 +7,7 @@ import org.tinyfix.latency.util.LongFormatter;
 
 
 public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
-    private static final boolean VERBOSE = true;
+    private static final boolean VERBOSE = false;
     private final CorrelationIdListener listener;
     private final int bufferSize = 8*1024;  // Should be larger than MTU
     private final ZeroGCProtoByteBuffer buffer = new ZeroGCProtoByteBuffer(bufferSize, true);
