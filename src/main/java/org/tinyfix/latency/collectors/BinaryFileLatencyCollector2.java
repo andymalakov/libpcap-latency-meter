@@ -6,26 +6,31 @@ import org.tinyfix.latency.util.TimeOfDayFormatter;
 import java.io.*;
 import java.util.Arrays;
 
-
 /**
  * Records latency measurement in the following binary format format:
  * <pre>
  * OFFSET LENGTH DESCRIPTION
+ * -- header--
+ * 0        8     UTC timestamp of the moment we store this header (milliseconds count since 1/1/1970 0:00:00 UTC)
+ * 8        8     Timestamp of the first inbound message (microseconds, result of KeQueryPerformanceCounter/1000)*
+ * -- body --
  * 00       1     Size of correlation ID (N)
  * 01       N     Correlation ID (ASCII text)
- * N+1      8     UTC timestamp of the moment we store this record (milliseconds count since 1/1/1970 0:00:00 UTC)
- * N+9      8     Latency (in microseconds)
+ * N+1      8     Timestamp of inbound message (microseconds, result of KeQueryPerformanceCounter/1000)
+ * N+9      8     Timestamp of outbound message (microseconds, result of KeQueryPerformanceCounter/1000)
  * </pre>
  * Main method formats results to the following CSV format:
- * <pre>time-of-day, correlation-id, latency (microseconds)</pre>
+ * <pre>time-of-day, correlation-id, latency (microseconds), timestamp of inbound, timestamp of outbound</pre>
  */
-public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecorder {
 
-    public BinaryFileLatencyCollector(String filename) throws IOException {
+
+public class BinaryFileLatencyCollector2 extends AbstractBinaryStreamLatencyRecorder {
+    private boolean headerStored;
+    public BinaryFileLatencyCollector2(String filename) throws IOException {
         this(new BufferedOutputStream(new FileOutputStream(filename), 8192));
     }
 
-    public BinaryFileLatencyCollector(OutputStream os) throws IOException {
+    public BinaryFileLatencyCollector2(OutputStream os) throws IOException {
         super(os);
         assert CaptureSettings.MAX_CORRELATION_ID_LENGTH <= 256; // we fit correlation ID length into single byte
     }
@@ -34,10 +39,17 @@ public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecor
     public synchronized void recordLatency(byte[] buffer, int offset, int length, long inboundTimestamp, long outboundTimestamp) {
         assert length < 256; // must fit into byte
         try {
+            if ( ! headerStored) {
+                headerStored = true;
+                writeLong (System.currentTimeMillis());
+                writeLong (inboundTimestamp);
+            }
+
+            // correlationId (max length is 255 bytes)
             os.write(length);
             os.write(buffer, offset, length);
-            writeLong (System.currentTimeMillis());
-            writeLong (outboundTimestamp - inboundTimestamp);
+            writeLong (inboundTimestamp);
+            writeLong (outboundTimestamp);
         } catch (IOException e) {
             throw new RuntimeException("Error writing latency stats", e);
         }
@@ -57,6 +69,11 @@ public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecor
 
         int signalCount = 0;
         try {
+            // read 18-byte header
+            is.read(correlationIdBuffer, 0 , 2*SIZE_OF_INT);
+            final long epochTime = readLong(correlationIdBuffer, SIZE_OF_INT);
+            final long queryPerformanceCounnterBase = readLong(correlationIdBuffer, SIZE_OF_INT);
+
             while (true) {
                 int signalLength = is.read();
                 if (signalLength == -1)
@@ -67,16 +84,22 @@ public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecor
                     System.out.println("Unexpected EOF while reading signal #" + (signalCount+1));
                 }
 
-                long timestamp = readLong(correlationIdBuffer, signalLength);
-                long latency = readLong(correlationIdBuffer, signalLength + SIZE_OF_INT);
+                long inboundTimestamp = readLong(correlationIdBuffer, signalLength);
+                long outboundTimestamp = readLong(correlationIdBuffer, signalLength + SIZE_OF_INT);
 
+                long timestamp = (outboundTimestamp-queryPerformanceCounnterBase)+epochTime;
                 TimeOfDayFormatter.formatTimeOfDay(timestamp, timestampBuffer);
                 writer.print(timestampBuffer);
 
+                long latency = outboundTimestamp-inboundTimestamp;
                 writer.print(',');
                 writer.print(new String(correlationIdBuffer, 0, signalLength));
                 writer.print(',');
                 writer.print(latency);
+                writer.print(',');
+                writer.print(inboundTimestamp);
+                writer.print(',');
+                writer.print(outboundTimestamp);
                 writer.print('\n');
 
 
@@ -91,6 +114,7 @@ public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecor
         } finally {
             is.close();
             writer.close();
+
         }
 
         if (sortedLatencies != null && signalCount > 0) {
@@ -110,3 +134,4 @@ public class BinaryFileLatencyCollector extends AbstractBinaryStreamLatencyRecor
 
     }
 }
+

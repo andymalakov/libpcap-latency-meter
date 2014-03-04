@@ -153,7 +153,10 @@ public class AbstractCaptureProcessor<T> {
             else
                 result.add(new CsvFileLatencyCollector(outputFile));
         } else {
-            result.add(new BinaryFileLatencyCollector(outputFile));
+            if (outputFile.toLowerCase().endsWith(".bin2"))
+                result.add(new BinaryFileLatencyCollector2(outputFile));
+            else
+                result.add(new BinaryFileLatencyCollector(outputFile));
         }
 
         return new ChainedLatencyCollector(result.toArray(new LatencyCollector[result.size()]));
