@@ -51,6 +51,7 @@
     <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
         <classpath>
             <pathelement location="${lib}/jnetpcap.jar"/>
+            <pathelement location="${lib}/HdrHistogram.jar"/>
 			<pathelement location="${lib}/mf/MFAPI.jar"/>
             <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
         </classpath>
@@ -76,7 +77,7 @@
     </jar>
   </target> <!-- jar -->
 
-	<target name="src" description="Builds source package">
+  <target name="src" description="Builds source package">
     <zip destfile="target\fix-latency-meter-0.1.RC1.sources.zip">
         <fileset dir=".">
             <include name="bin/**/*.cmd"/>

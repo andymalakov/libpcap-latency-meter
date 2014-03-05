@@ -1,1 +1,15 @@
-This tool includes jNetPcap software developed by Sly Technologies and distributed under LGPL license free of charge and royalties.
+This tool includes the following software:
+
+* jNetPcap library developed by Sly Technologies and distributed under LGPL license and is free of charge and royalties.
+  http://www.jnetpcap.com/
+
+* HdrHistogram library by Gil Tene (distributed under Creative Commons License)
+  http://hdrhistogram.github.io/HdrHistogram/
+
+
+
+Fix Latency Meter itself is distributed under LGPL license free of charge and royalties.
+
+
+
+
