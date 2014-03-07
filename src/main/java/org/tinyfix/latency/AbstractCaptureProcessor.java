@@ -112,6 +112,7 @@ public class AbstractCaptureProcessor<T> {
                     System.err.println("Shutting down...");
                     if (!isClosed)
                         pcap.breakloop();
+                    latencyCollector.close();
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
