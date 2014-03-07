@@ -8,8 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 public class StatProcessor {
 
-    private static final long HISTOGRAM_MAX_VALUE = Long.parseLong(System.getProperty("histogramHighestTrackableValue", Long.toString(TimeUnit.MINUTES.toMicros(5))));
-
     public static void main (String ...args) throws Exception {
         final String inputFile = args[0];
         final int numberOfPoints = countNumberOfLines(inputFile) + 1;
@@ -17,9 +15,6 @@ public class StatProcessor {
 
         String firstLine = null;
         String lastLine = null;
-
-        // A Histogram covering the range from 1 nsec to 1 hour with 5 decimal point resolution:
-        final Histogram histogram = new Histogram(HISTOGRAM_MAX_VALUE, 3);
 
         int signalCount = 0;
         try (LineNumberReader reader = new LineNumberReader(new FileReader(inputFile))) {
@@ -40,7 +35,6 @@ public class StatProcessor {
                     throw new Exception("Latency value exceeds INT32: " + latency);
 
                 sortedLatencies[signalCount] = (int)latency;
-                histogram.recordValue(latency);
                 signalCount++;
             }
         }
@@ -59,21 +53,7 @@ public class StatProcessor {
             System.out.println("99.999%: " + sortedLatencies[ (int)(99999L*signalCount/100000)]);
             System.out.println("99.9999%: " + sortedLatencies[ (int)(999999L*signalCount/1000000)]);
             System.out.println("99.99999%:" + sortedLatencies[ (int)(9999999L*signalCount/10000000)]);
-
-
-            System.out.println("\n-------------\nHdrHistogram:\n-------------");
-            histogram.getHistogramData().outputPercentileDistribution(System.out, 5, 1000.0, false);
-
-
-
-            try (PrintStream ps = new PrintStream("hist.csv")) {
-                histogram.getHistogramData().outputPercentileDistribution(ps, 5, 1000.0, true);
-            }
-            System.out.println("Saved histogram into hist.csv...");
-
         }
-
-
     }
 
     private static String cutTimestamp(String line) {
