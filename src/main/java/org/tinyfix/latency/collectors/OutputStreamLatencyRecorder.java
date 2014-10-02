@@ -29,5 +29,6 @@ public abstract class OutputStreamLatencyRecorder implements LatencyCollector {
         } catch (IOException e) {
             throw new RuntimeException("Error writing latency stats", e);
         }
+        System.out.print("Closed output stream");
     }
 }
