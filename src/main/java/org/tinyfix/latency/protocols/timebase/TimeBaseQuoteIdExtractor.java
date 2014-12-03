@@ -1,6 +1,8 @@
-package org.tinyfix.latency.protocols;
+package org.tinyfix.latency.protocols.timebase;
 
 import org.jnetpcap.packet.JPacket;
+import org.tinyfix.latency.protocols.CorrelationIdExtractor;
+import org.tinyfix.latency.protocols.CorrelationIdListener;
 
 /** Quick-and-Dirty way of extracting BestBidOfferMessage.bidQuoteId and .askQuoteID from Deltix TimeBase packets */
 class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {

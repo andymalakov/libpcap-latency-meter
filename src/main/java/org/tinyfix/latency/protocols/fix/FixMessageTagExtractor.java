@@ -1,11 +1,14 @@
-package org.tinyfix.latency.protocols;
+package org.tinyfix.latency.protocols.fix;
 
 import org.jnetpcap.packet.JPacket;
 import org.tinyfix.latency.common.CaptureSettings;
+import org.tinyfix.latency.protocols.CorrelationIdExtractor;
+import org.tinyfix.latency.protocols.CorrelationIdListener;
+import org.tinyfix.latency.protocols.ParseException;
 import org.tinyfix.latency.util.AsciiUtils;
 
 /** Handles messages of FIX protocol. Scans JPacket and extracts value of given FIX tag */
-class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
+public class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
     private static final byte SOH = 1;
     private static final byte[] BEGIN_STRING_PREFIX = AsciiUtils.getBytes("8=FIX.");
     private static final int BEGIN_STRING_PREFIX_LEN = BEGIN_STRING_PREFIX.length;
@@ -20,7 +23,7 @@ class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
     /**
      * @param tagNum FIX tag that this parser will look for
      */
-    FixMessageTagExtractor(int tagNum, CorrelationIdListener listener) {
+    public FixMessageTagExtractor(int tagNum, CorrelationIdListener listener) {
         this.correlationPrefix = AsciiUtils.getBytes("\001" + Integer.toString(tagNum) + "=");
         this.correlationIdBuffer = new byte[CaptureSettings.MAX_CORRELATION_ID_LENGTH];
         this.correlationPrefixLength = correlationPrefix.length;
