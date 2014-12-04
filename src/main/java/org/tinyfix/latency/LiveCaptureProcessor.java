@@ -103,7 +103,7 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
         for (int i=0; i < interfaces.size(); i++) {
             PcapIf device = interfaces.get(i);
             String description = (device.getDescription() != null) ? device.getDescription() : "No description available";
-            System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
+            System.out.printf("#%d: %s [%s]\n", i, device.getName(), description);
         }
     }
 
