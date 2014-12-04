@@ -1,60 +1,50 @@
 package org.tinyfix.latency.protocols;
 
-import com.marketfactory.zerogc.api.MarketFactoryQuoteIdExtractor;
+import org.tinyfix.latency.protocols.fix.FixMessageTagExtractorFactory;
+import org.tinyfix.latency.protocols.timebase.TBPlayerCorrelationIdExtractorFactory;
+import org.tinyfix.latency.protocols.timebase.TimeBaseQuoteIdExtractorFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Registry of payload protocol handlers
  */
-public class ProtocolHandlers {
+public class ProtocolHandlers<T> {
 
-    private static final String FIX_KEY = "fix:";
-    private static final String TIMEBASE_KEY = "timebase";
-    private static final String MARKET_FACTORY_KEY = "mf";
-    private static final String TB_PLAYBACK_KEY = "tbplayback";
 
-    public static <T> ProtocolHandlerFactory<T> getProtocolHandler(final String key) {
-        if (key.startsWith(FIX_KEY)) {
-            return new ProtocolHandlerFactory<T>() {
-                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-                    int fixTagNumber = Integer.parseInt(key.substring(FIX_KEY.length()));
-                    return new FixMessageTagExtractor<>(fixTagNumber, listener);
-                }
-                public String toString() {
-                    return "FIX Protocol (tag " + key.substring(FIX_KEY.length()) + ')';
-                }
-            };
-        } else
-        if (key.equals(TIMEBASE_KEY)) {
-            return new ProtocolHandlerFactory<T>() {
-                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-                    return new TimeBaseQuoteIdExtractor<>(listener);
-                }
-                public String toString() {
-                    return "TimeBase Protocol (HACK)";
-                }
-            };
+    private final List<CorrelationIdExtractorFactory<T>> protocolHandlers = new ArrayList<>();
 
-        } else
-        if (key.equals(MARKET_FACTORY_KEY)) {
-            return new ProtocolHandlerFactory<T>() {
-                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-                    return new MarketFactoryQuoteIdExtractor<>(listener);
-                }
-                public String toString() {
-                    return "MarketFactory Data/Trade";
-                }
-            };
-        } else
-        if (key.equals(TB_PLAYBACK_KEY)) {
-            return new ProtocolHandlerFactory<T>() {
-                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-                    return new TBPlayerCorrelationIdExtractor<>(listener);
-                }
-                public String toString() {
-                    return "TimeBase Playback";
-                }
-            };
+    public ProtocolHandlers() {
+        // list of standard protocols
+        addProtocolHandler(new FixMessageTagExtractorFactory<T>());
+        addProtocolHandler(new TBPlayerCorrelationIdExtractorFactory<T>());
+        addProtocolHandler(new TimeBaseQuoteIdExtractorFactory<T>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addProtocolHandler (String protocolClassName) {
+        try {
+            Object metaFactory = Class.forName(protocolClassName).newInstance();
+            if (!(metaFactory instanceof CorrelationIdExtractorFactory))
+                throw new IllegalArgumentException("Class " + protocolClassName + " does not implement CorrelationIdExtractorFactory interface");
+            addProtocolHandler((CorrelationIdExtractorFactory<T>) metaFactory);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid custom protocol: " + protocolClassName, e);
         }
-        throw new IllegalArgumentException("Unsupported protocol handler: \"" + key + '"');
+    }
+
+    public void addProtocolHandler (CorrelationIdExtractorFactory<T> protocolClass) {
+        protocolHandlers.add(protocolClass);
+    }
+
+    public CorrelationIdExtractor<T> create(String handlerKey, CorrelationIdListener idListener) {
+        for (CorrelationIdExtractorFactory<T> factory : protocolHandlers) {
+            CorrelationIdExtractor<T> result = factory.create(handlerKey, idListener);
+            if (result != null)
+                return result;
+
+        }
+        throw new IllegalArgumentException("Unsupported protocol handler: \"" + handlerKey + '"');
     }
 }

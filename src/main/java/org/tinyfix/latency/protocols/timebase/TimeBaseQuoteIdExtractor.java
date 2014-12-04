@@ -5,7 +5,7 @@ import org.tinyfix.latency.protocols.CorrelationIdExtractor;
 import org.tinyfix.latency.protocols.CorrelationIdListener;
 
 /** Quick-and-Dirty way of extracting BestBidOfferMessage.bidQuoteId and .askQuoteID from Deltix TimeBase packets */
-class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
+public class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
 
     private static final int CHAR_SEQUENCE_COUNTER_LENGTH = 20;
     private static final int MIN_NUMBER_OF_LEADING_ZEROS = CHAR_SEQUENCE_COUNTER_LENGTH/2;
@@ -15,7 +15,7 @@ class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
     private final byte [] correlationIdBuffer;
     private final CorrelationIdListener listener;
 
-    protected TimeBaseQuoteIdExtractor(CorrelationIdListener listener) {
+    public TimeBaseQuoteIdExtractor(CorrelationIdListener listener) {
         this.listener = listener;
         signature = new byte [SIGNATURE_PREFIX + MIN_NUMBER_OF_LEADING_ZEROS];
         correlationIdBuffer = new byte [SIGNATURE_PREFIX + CHAR_SEQUENCE_COUNTER_LENGTH];
@@ -73,4 +73,7 @@ class TimeBaseQuoteIdExtractor<T> implements CorrelationIdExtractor<T> {
         }
     }
 
+    public String toString() {
+        return "TimeBase Protocol (HACK)";
+    }
 }

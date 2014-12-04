@@ -10,7 +10,7 @@ import org.tinyfix.latency.util.Util;
 public class TBPlayerCorrelationIdExtractor<T> implements CorrelationIdExtractor<T> {
 
     private static final int MIN_PACKET_LENGTH = 11;
-    static byte [] MAGIC = {
+    public static byte [] MAGIC = {
             (byte) 0xC0, // Ma-
             (byte) 0xDE, // -
             (byte) 0x07, // gic
@@ -80,5 +80,8 @@ public class TBPlayerCorrelationIdExtractor<T> implements CorrelationIdExtractor
         return offset;
     }
 
+    public String toString() {
+        return "TimeBase Playback";
+    }
 
 }

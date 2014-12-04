@@ -3,9 +3,7 @@ package org.tinyfix.latency.protocols;
 import org.jnetpcap.packet.JPacket;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import org.tinyfix.latency.protocols.fix.FixMessageTagExtractor;
 
 /**
  * @author Andy

@@ -195,7 +195,10 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
             buffer.getByte();
     }
 
-
+    @Override
+    public String toString() {
+        return "MarketFactory Data/Trade";
+    }
 
 }
 

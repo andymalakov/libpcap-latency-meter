@@ -16,10 +16,12 @@ import java.util.List;
 public class AbstractCaptureProcessor<T> {
     protected String outputFile = "latencies.csv";
     protected TcpPacketFilter packetFilter;
-    protected ProtocolHandlerFactory<T> inboundHandler;
-    protected ProtocolHandlerFactory<T> outboundHandler;
+    protected String inboundHandlerKey;
+    protected String outboundHandlerKey;
     protected int statBufferSize = 100;
     protected boolean isTracingMode = false;
+
+    protected final ProtocolHandlers<T> protocolHandlers = new ProtocolHandlers<>();
 
     protected void run (String ... args) throws Exception {
         parse(args);
@@ -51,6 +53,7 @@ public class AbstractCaptureProcessor<T> {
         System.out.println("\t-csv:filename\t- Specifies file name of output file will latencies stats. [Optional]");
         System.out.println("\t-stat:N\t- Specifies number of outbound signal signals to display console progress. [Optional]");
         System.out.println("\t-trace\t- Traces all discovered inbound and outbound signals. [Slow]");
+        System.out.println("\t-p:<factory-class>\t- Custom implementation of CorrelationIdExtractorFactory");
     }
 
     protected boolean parseCommandLineArgument (String arg) {
@@ -68,12 +71,17 @@ public class AbstractCaptureProcessor<T> {
             }
             return true;
         }
+        if (arg.startsWith("-p:")) {
+            String protocolClassName = arg.substring(3);
+            protocolHandlers.addProtocolHandler(protocolClassName);
+            return true;
+        }
         if (arg.startsWith("-in:")) {
-            inboundHandler = ProtocolHandlers.getProtocolHandler(value(arg));
+            inboundHandlerKey = value(arg);
             return true;
         }
         if (arg.startsWith("-out:")) {
-            outboundHandler = ProtocolHandlers.getProtocolHandler(value(arg));
+            outboundHandlerKey = value(arg);
             return true;
         }
         if (arg.startsWith("-result:")) {
@@ -135,8 +143,8 @@ public class AbstractCaptureProcessor<T> {
 
     protected void printSelectedSettings() {
         System.out.println("Packet direction filter: " + packetFilter);
-        System.out.println("Inbound packet handler: " + inboundHandler);
-        System.out.println("Outbound packet handler: " + outboundHandler);
+        System.out.println("Inbound packet handler: " + inboundHandlerKey);
+        System.out.println("Outbound packet handler: " + outboundHandlerKey);
         System.out.println("Inbound signals buffer size: " + CaptureSettings.RING_BUFFER_CAPACITY/1024 + 'K');
         System.out.println("Capture packet snap length: " + CaptureSettings.PACKET_SNAP_LENGTH/1024 + 'K');
         System.out.println("Capture filter network mask: " + CaptureSettings.FILTER_NETWORK_MASK_HEX);
@@ -189,8 +197,8 @@ public class AbstractCaptureProcessor<T> {
             outboundIdListener = new TracingCorrelationIdListener("OUT> ", outboundIdListener);
         }
 
-        CorrelationIdExtractor<T> inboundIdExtractor = inboundHandler.create(inboundIdListener);
-        CorrelationIdExtractor<T> outboundIdExtractor = outboundHandler.create(outboundIdListener);
+        CorrelationIdExtractor<T> inboundIdExtractor = protocolHandlers.create(inboundHandlerKey, inboundIdListener);
+        CorrelationIdExtractor<T> outboundIdExtractor = protocolHandlers.create(outboundHandlerKey, outboundIdListener);
 
         return new LatencyMeterPacketHandler<>(packetFilter, inboundIdExtractor, outboundIdExtractor);
     }

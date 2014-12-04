@@ -1,8 +1,8 @@
 package org.tinyfix.latency.protocols.fix;
 
 import org.tinyfix.latency.protocols.CorrelationIdExtractor;
-import org.tinyfix.latency.protocols.CorrelationIdListener;
 import org.tinyfix.latency.protocols.CorrelationIdExtractorFactory;
+import org.tinyfix.latency.protocols.CorrelationIdListener;
 
 public class FixMessageTagExtractorFactory<T> implements CorrelationIdExtractorFactory<T> {
     private static final String FIX_KEY = "fix:";

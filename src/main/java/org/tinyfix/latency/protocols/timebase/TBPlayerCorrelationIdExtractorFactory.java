@@ -8,16 +8,9 @@ public class TBPlayerCorrelationIdExtractorFactory<T> implements CorrelationIdEx
     private static final String TB_PLAYBACK_KEY = "tbplayback";
 
     @Override
-    public CorrelationIdExtractorFactory<T> accept(String key) {
-        if (key.equals(TB_PLAYBACK_KEY)) {
-            return new CorrelationIdExtractorFactory<T>() {
-                public CorrelationIdExtractor<T> create(CorrelationIdListener listener) {
-                    return new TBPlayerCorrelationIdExtractor<>(listener);
-                }
-                public String toString() {
-                    return "TimeBase Playback";
-                }
-            };
+    public CorrelationIdExtractor<T> create(String protocolKey, CorrelationIdListener listener) {
+        if (protocolKey.equals(TB_PLAYBACK_KEY)) {
+            return new TBPlayerCorrelationIdExtractor<>(listener);
         }
         return null;
     }

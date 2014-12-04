@@ -13,7 +13,7 @@ public class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
     private static final byte[] BEGIN_STRING_PREFIX = AsciiUtils.getBytes("8=FIX.");
     private static final int BEGIN_STRING_PREFIX_LEN = BEGIN_STRING_PREFIX.length;
     private static final int FULL_BEGIN_STRING_LENGTH = "8=FIX.X.X".length();
-
+    private final int tagNum;
     private final byte[] correlationPrefix; // contains FIX tag prefix, starting with SOH separator, e.g. "|299="
     private final int correlationPrefixLength;
     private final byte[] correlationIdBuffer;
@@ -24,6 +24,7 @@ public class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
      * @param tagNum FIX tag that this parser will look for
      */
     public FixMessageTagExtractor(int tagNum, CorrelationIdListener listener) {
+        this.tagNum = tagNum;
         this.correlationPrefix = AsciiUtils.getBytes("\001" + Integer.toString(tagNum) + "=");
         this.correlationIdBuffer = new byte[CaptureSettings.MAX_CORRELATION_ID_LENGTH];
         this.correlationPrefixLength = correlationPrefix.length;
@@ -72,5 +73,9 @@ public class FixMessageTagExtractor<T> implements CorrelationIdExtractor<T> {
             //e.printStackTrace();
         }
 
+    }
+
+    public String toString() {
+        return "FIX Protocol (tag#" + tagNum + ')';
     }
 }
