@@ -22,19 +22,13 @@
       </profile>
     </annotationProcessing>
   </component>
-  <component name="CopyrightManager" default="">
-    <module2copyright />
-  </component>
+  <component name="CopyrightManager" default="" />
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
-  </component>
-  <component name="GradleSettings">
-    <option name="gradleHome" value="D:/Development/Gradle/gradle-1.8" />
-    <option name="preferLocalInstallationToWrapper" value="true" />
   </component>
   <component name="IdProvider" IDEtalkID="3A98FD0A578D35C502790E35F6B88D45" />
   <component name="Palette2">
@@ -160,7 +154,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/fix-latency-meter.iml" filepath="$PROJECT_DIR$/fix-latency-meter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libpcap-latency-meter.iml" filepath="$PROJECT_DIR$/libpcap-latency-meter.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">

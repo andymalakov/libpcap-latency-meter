@@ -6,12 +6,13 @@
   * run with -projecthelp option to obtain list of supported tasks
   *************************************************************************
   -->
-<project name="fix-latency-meter" default="build" basedir=".">
+<project name="libpcap-latency-meter" default="build" basedir=".">
 
-  <description>FIX latency meter</description>
+  <description>LIBPCAP latency meter</description>
 
   <!-- set global properties for this script -->
   <property name="verbose" value="false"/>
+  <property name="version" value="0.2RC1"/>
   <property name="debug.mode" value="true"/>
 
   <property environment="env"/>
@@ -69,7 +70,7 @@
   </target> <!-- compile -->
 
   <target name="jar" depends="compile" description="Generate jar">
-    <jar destfile="target\fix-latency-meter-0.1.RC1.jar">
+    <jar destfile="target\libpcap-latency-meter-${version}.jar">
         <fileset dir="${classesdir}">
             <include name="**/*.class"/>
         </fileset>
@@ -77,13 +78,13 @@
   </target> <!-- jar -->
 
   <target name="src" description="Builds source package">
-    <zip destfile="target\fix-latency-meter-0.1.RC1.sources.zip">
+    <zip destfile="target\libpcap-latency-meter-${version}.sources.zip">
         <fileset dir=".">
             <include name="bin/**/*.cmd"/>
             <include name="lib/**/*.jar"/>
             <include name="**/*.java"/>
 			<include name="**/*.xml"/>
-			<include name="fix-latency-meter*.*"/>
+			<include name="libpcap-latency-meter*.*"/>
 			<include name="COPYING"/>
 			<include name="COPYING.LESSER"/>
 			<include name="NOTICE"/>

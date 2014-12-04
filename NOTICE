@@ -6,9 +6,7 @@ This tool includes the following software:
 * HdrHistogram library by Gil Tene (distributed under Creative Commons License)
   http://hdrhistogram.github.io/HdrHistogram/
 
-
-
-Fix Latency Meter itself is distributed under LGPL license free of charge and royalties.
+LBPCAP Latency Meter itself is distributed under LGPL license free of charge and royalties.
 
 
 
