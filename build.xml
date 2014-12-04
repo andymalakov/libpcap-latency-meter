@@ -8,98 +8,99 @@
   -->
 <project name="libpcap-latency-meter" default="build" basedir=".">
 
-  <description>LIBPCAP latency meter</description>
+    <description>LIBPCAP latency meter</description>
 
-  <!-- set global properties for this script -->
-  <property name="verbose" value="false"/>
-  <property name="version" value="0.2RC1"/>
-  <property name="debug.mode" value="true"/>
+    <!-- set global properties for this script -->
+    <property name="verbose" value="false"/>
+    <property name="version" value="0.2RC1"/>
+    <property name="debug.mode" value="true"/>
 
-  <property environment="env"/>
+    <property environment="env"/>
 
-  <!-- Sets the basic environment -->
-  <property name="lib"            location="lib"/>
-  <property name="bin"            location="bin"/>
-  <property name="data"           location="data"/>
-  <property name="source"         location="src/main/java"/>
-  <property name="classesdir"     location="target/classes"/>
-  <property name="testsource"     location="src/test/java"/>
-  <property name="testclassesdir" location="target/test-classes"/>
+    <!-- Sets the basic environment -->
+    <property name="lib"            location="lib"/>
+    <property name="bin"            location="bin"/>
+    <property name="data"           location="data"/>
+    <property name="source"         location="src/main/java"/>
+    <property name="classesdir"     location="target/classes"/>
+    <property name="testsource"     location="src/test/java"/>
+    <property name="testclassesdir" location="target/test-classes"/>
 
-  <target name="build" depends="init,compile,jar" description="Full build"/>
+    <target name="build" depends="init,compile,jar" description="Full build"/>
 
-  <target name="init">
-    <echo message="Output: ${classesdir}"/>
-    <echo message="java.home: ${java.home}"/>
+    <target name="init">
+        <echo message="Output: ${classesdir}"/>
+        <echo message="java.home: ${java.home}"/>
 
-    <mkdir dir="${classesdir}"/>
-    <mkdir dir="${testclassesdir}"/>
-  </target> <!-- init -->
+        <mkdir dir="${classesdir}"/>
+        <mkdir dir="${testclassesdir}"/>
+    </target> <!-- init -->
 
-  <target name="clean" depends="init" description="Clean up all output">
+    <target name="clean" depends="init" description="Clean up all output">
 
-    <!-- delete compiled classes -->
-    <delete failonerror="no">
-       <fileset dir="${classesdir}" includes="**/*.class"/>
-       <fileset dir="${testclassesdir}" includes="**/*.class"/>
-       <fileset dir="target/*.jar"/>
-    </delete>
-  </target> <!-- clean -->
+        <!-- delete compiled classes -->
+        <delete failonerror="no">
+            <fileset dir="${classesdir}" includes="**/*.class"/>
+            <fileset dir="${testclassesdir}" includes="**/*.class"/>
+            <fileset dir="target/*.jar"/>
+        </delete>
+    </target> <!-- clean -->
 
-  <target name="compile" depends="init" description="Compiles sources">
-    <echo>Compiling all Java files from ${source} into ${classesdir}</echo>
+    <target name="compile" depends="init" description="Compiles sources">
+        <echo>Compiling all Java files from ${source} into ${classesdir}</echo>
 
-    <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
-        <classpath>
-            <pathelement location="${lib}/jnetpcap.jar"/>
-            <pathelement location="${lib}/HdrHistogram.jar"/>
-        </classpath>
-    </javac>
-  </target> <!-- compile -->
+        <javac srcdir="${source}" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
+            <classpath>
+                <pathelement location="${lib}/jnetpcap.jar"/>
+                <pathelement location="${lib}/HdrHistogram.jar"/>
+            </classpath>
+        </javac>
+    </target> <!-- compile -->
 
-  <target name="jar" depends="compile" description="Generate jar">
-    <jar destfile="target\libpcap-latency-meter-${version}.jar">
-        <fileset dir="${classesdir}">
-            <include name="**/*.class"/>
-        </fileset>
-    </jar>
-  </target> <!-- jar -->
+    <target name="jar" depends="compile" description="Generate jar">
+        <jar destfile="target\libpcap-latency-meter-${version}.jar">
+            <fileset dir="${classesdir}">
+                <include name="**/*.class"/>
+            </fileset>
+        </jar>
+    </target> <!-- jar -->
 
-  <target name="src" description="Builds source package">
-    <zip destfile="target\libpcap-latency-meter-${version}.sources.zip">
-        <fileset dir=".">
-            <include name="bin/**/*.cmd"/>
-            <include name="lib/**/*.jar"/>
-            <include name="**/*.java"/>
-			<include name="**/*.xml"/>
-			<include name="libpcap-latency-meter*.*"/>
-			<include name="COPYING"/>
-			<include name="COPYING.LESSER"/>
-			<include name="NOTICE"/>
-			<include name="README.md"/>
-        </fileset>
-    </zip>
-  </target> <!-- src -->
+    <target name="src" description="Builds source package">
+        <zip destfile="target\libpcap-latency-meter-${version}.sources.zip">
+            <fileset dir=".">
+                <include name="bin/**/*.cmd"/>
+                <include name="lib/**/*.jar"/>
+                <include name="**/*.java"/>
+                <include name="**/*.xml"/>
+                <include name="libpcap-latency-meter*.*"/>
+                <include name="COPYING"/>
+                <include name="COPYING.LESSER"/>
+                <include name="NOTICE"/>
+                <include name="README.md"/>
+            </fileset>
+        </zip>
+    </target> <!-- src -->
 
-  <target name="test" description="Run unit tests">
-      <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
-          <classpath>
-              <pathelement location="${classesdir}"/>
-              <pathelement location="${lib}/jnetpcap.jar"/>
-              <pathelement location="${lib}/junit-4.7.jar"/>
-          </classpath>
-      </javac>
-      <!-- TODO... -->
-  </target>
+    <target name="test" description="Run unit tests">
+        <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
+            <classpath>
+                <pathelement location="${classesdir}"/>
+                <pathelement location="${lib}/jnetpcap.jar"/>
+                <pathelement location="${lib}/junit-4.7.jar"/>
+            </classpath>
+        </javac>
+        <!-- TODO... -->
+    </target>
 
-  <target name="hello" description="Run basic test">
-    <java classname="org.tinyfix.latency.Test" fork="true" maxmemory="512m" dir="${bin}">
-		<classpath>
-			<pathelement location="${lib}/jnetpcap.jar"/>
-			<pathelement path="${classesdir}"/>
-		</classpath>
-    </java>
-  </target> <!-- hello -->
+    <target name="hello" description="Run basic test">
+        <java classname="org.tinyfix.latency.Test" fork="true" maxmemory="512m" dir="${bin}">
+            <classpath>
+                <pathelement location="${lib}/jnetpcap.jar"/>
+                <pathelement path="${classesdir}"/>
+            </classpath>
+            <sysproperty key="java.library.path" value="${bin}"/>
+        </java>
+    </target> <!-- hello -->
 
     <target name="file-test" depends="compile" description="Run test">
         <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
