@@ -62,8 +62,7 @@
 			<pathelement location="${classesdir}"/>
             <pathelement location="${lib}/jnetpcap.jar"/>
             <pathelement location="${lib}/junit-4.7.jar"/>
-			<pathelement location="${lib}/mf/MFAPI.jar"/>
-			<pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
+			<pathelement location="${lib}/mf/MFAPI*.jar"/>
         </classpath>
     </javac>
 
