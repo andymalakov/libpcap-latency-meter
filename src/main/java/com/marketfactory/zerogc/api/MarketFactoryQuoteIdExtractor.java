@@ -125,12 +125,12 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         }
     }
 
+    private static final MktDataMessage mktDataMessage = new MktDataMessage(); //MktDataMessage.recycleZeroGCInstance();
     private void decodeMarketDataMessage(JPacket packet) {
-        MktDataMessage marketData = MktDataMessage.recycleZeroGCInstance();
-        marketData.deserializeZeroGC(buffer);
+        mktDataMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("MktDataMessage: " + marketData);
-        LongFormatter.format(marketData.mvd.timeApiServer, formattedNumber, 0);
+            System.out.println("MktDataMessage: " + mktDataMessage);
+        LongFormatter.format(mktDataMessage.mvd.timeApiServer, formattedNumber, 0);
         int offset = 0;
         while (formattedNumber[offset] == ' ')
             offset++;
@@ -138,48 +138,48 @@ public class MarketFactoryQuoteIdExtractor<T> implements CorrelationIdExtractor<
         listener.onCorrelationId(packet, formattedNumber, offset, formattedNumber.length - offset);
     }
 
+    private static final SubmitOrderMessage submitOrderMessage = new SubmitOrderMessage(); //SubmitOrderMessage.recycleZeroGCInstance();
     private void decodeSubmitOrderMessage(JPacket packet) {
-        SubmitOrderMessage order = SubmitOrderMessage.recycleZeroGCInstance();
-        order.deserializeZeroGC(buffer);
+        submitOrderMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("SubmitOrderMessage: " + order.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
-        int len = copyAsByteArray(order.contents.clOrdID, formattedNumber);
+            System.out.println("SubmitOrderMessage: " + submitOrderMessage.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+        int len = copyAsByteArray(submitOrderMessage.contents.clOrdID, formattedNumber);
         listener.onCorrelationId(packet, formattedNumber, 0, len);
     }
 
+    private static final OrderReceivedMessage orderReceivedMessage = new OrderReceivedMessage(); //OrderReceivedMessage.recycleZeroGCInstance();
     private void decodeOrderReceivedMessage(JPacket packet) {
-        OrderReceivedMessage orderReceived = OrderReceivedMessage.recycleZeroGCInstance();
-        orderReceived.deserializeZeroGC(buffer);
+        orderReceivedMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("OrderReceivedMessage: " + orderReceived.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
-        int len = copyAsByteArray(orderReceived.contents.clOrdID, formattedNumber);
+            System.out.println("OrderReceivedMessage: " + orderReceivedMessage.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+        int len = copyAsByteArray(orderReceivedMessage.contents.clOrdID, formattedNumber);
         listener.onCorrelationId(packet, formattedNumber, 0, len);
     }
 
+    private static final OrderRejectedMessage orderRejectedMessage = new OrderRejectedMessage(); //OrderRejectedMessage.recycleZeroGCInstance();
     private void decodeOrderRejectedMessage(JPacket packet) {
-        OrderRejectedMessage orderRejected = OrderRejectedMessage.recycleZeroGCInstance();
-        orderRejected.deserializeZeroGC(buffer);
+        orderRejectedMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("OrderRejectedMessage: " + orderRejected.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
-        int len = copyAsByteArray(orderRejected.contents.clOrdID, formattedNumber);
+            System.out.println("OrderRejectedMessage: " + orderRejectedMessage.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+        int len = copyAsByteArray(orderRejectedMessage.contents.clOrdID, formattedNumber);
         listener.onCorrelationId(packet, formattedNumber, 0, len);
     }
 
+    private static final OrderSubmittedMessage orderSubmittedMessage = new OrderSubmittedMessage(); //OrderSubmittedMessage.recycleZeroGCInstance();
     private void decodeOrderSubmittedMessage(JPacket packet) {
-        OrderSubmittedMessage orderSubmitted = OrderSubmittedMessage.recycleZeroGCInstance();
-        orderSubmitted.deserializeZeroGC(buffer);
+        orderSubmittedMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("OrderSubmittedMessage: " + orderSubmitted.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
-        int len = copyAsByteArray(orderSubmitted.contents.clOrdID, formattedNumber);
+            System.out.println("OrderSubmittedMessage: " + orderSubmittedMessage.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+        int len = copyAsByteArray(orderSubmittedMessage.contents.clOrdID, formattedNumber);
         listener.onCorrelationId(packet, formattedNumber, 0, len);
     }
 
+    private static final TradeCaptureMessage tradeCaptureMessage = new TradeCaptureMessage(); //TradeCaptureMessage.recycleZeroGCInstance();
     private void decodeTradeCaptureMessage(JPacket packet) {
-        TradeCaptureMessage tradeCapture = TradeCaptureMessage.recycleZeroGCInstance();
-        tradeCapture.deserializeZeroGC(buffer);
+        tradeCaptureMessage.deserializeZeroGC(buffer);
         if (VERBOSE)
-            System.out.println("TradeCaptureMessage: " + tradeCapture.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
-        int len = copyAsByteArray(tradeCapture.contents.clOrdID, formattedNumber);
+            System.out.println("TradeCaptureMessage: " + tradeCaptureMessage.contents.clOrdID + " time: " + packet.getCaptureHeader().timestampInMicros());
+        int len = copyAsByteArray(tradeCaptureMessage.contents.clOrdID, formattedNumber);
         listener.onCorrelationId(packet, formattedNumber, 0, len);
     }
 
