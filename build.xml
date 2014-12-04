@@ -53,20 +53,8 @@
         <classpath>
             <pathelement location="${lib}/jnetpcap.jar"/>
             <pathelement location="${lib}/HdrHistogram.jar"/>
-			<pathelement location="${lib}/mf/MFAPI.jar"/>
-            <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
         </classpath>
     </javac>
-
-    <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
-        <classpath>
-			<pathelement location="${classesdir}"/>
-            <pathelement location="${lib}/jnetpcap.jar"/>
-            <pathelement location="${lib}/junit-4.7.jar"/>
-			<pathelement location="${lib}/mf/MFAPI*.jar"/>
-        </classpath>
-    </javac>
-
   </target> <!-- compile -->
 
   <target name="jar" depends="compile" description="Generate jar">
@@ -91,17 +79,38 @@
 			<include name="README.md"/>
         </fileset>
     </zip>
-  </target> <!-- jar -->
-	
-  <target name="test" depends="compile" description="Run test">
+  </target> <!-- src -->
+
+  <target name="test" description="Run unit tests">
+      <javac srcdir="${testsource}" destdir="${testclassesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
+          <classpath>
+              <pathelement location="${classesdir}"/>
+              <pathelement location="${lib}/jnetpcap.jar"/>
+              <pathelement location="${lib}/junit-4.7.jar"/>
+          </classpath>
+      </javac>
+      <!-- TODO... -->
+  </target>
+
+  <target name="run" depends="compile" description="Run test">
     <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
 		<arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
 		<classpath>
 			<pathelement location="${lib}/jnetpcap.jar"/>
-			<pathelement location="${lib}/mf/MFAPI.jar"/>
-            <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
+            <pathelement location="${lib}/mf/*.jar"/>
 			<pathelement path="${classesdir}"/>
 		</classpath>
     </java>
-  </target> <!-- jar -->
+  </target> <!-- run -->
+
+
+    <target name="mf" depends="compile" description="Compiles MF protocol handler">
+        <javac srcdir="src/mf/java" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
+            <classpath>
+                <pathelement location="${lib}/jnetpcap.jar"/>
+                <pathelement location="${lib}/mf/MFAPI-zerogc.jar"/>
+            </classpath>
+        </javac>
+    </target> <!-- compile -->
+
 </project>
