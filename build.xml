@@ -92,17 +92,24 @@
       <!-- TODO... -->
   </target>
 
-  <target name="run" depends="compile" description="Run test">
-    <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
-		<arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
+  <target name="hello" description="Run basic test">
+    <java classname="org.tinyfix.latency.Test" fork="true" maxmemory="512m" dir="${bin}">
 		<classpath>
 			<pathelement location="${lib}/jnetpcap.jar"/>
-            <pathelement location="${lib}/mf/*.jar"/>
 			<pathelement path="${classesdir}"/>
 		</classpath>
     </java>
-  </target> <!-- run -->
+  </target> <!-- hello -->
 
+    <target name="file-test" depends="compile" description="Run test">
+        <java classname="org.tinyfix.latency.FiledCaptureProcessor" fork="true" maxmemory="512m" dir="${bin}">
+            <arg line="-in:mf -out:fix:8888 -dir:10033:5869 -pcap:${data}\feed-10K-packets.pcap"/>
+            <classpath>
+                <pathelement location="${lib}/jnetpcap.jar"/>
+                <pathelement path="${classesdir}"/>
+            </classpath>
+        </java>
+    </target> <!-- file-test -->
 
     <target name="mf" depends="compile" description="Compiles MF protocol handler">
         <javac srcdir="src/mf/java" destdir="${classesdir}" verbose="${verbose}" deprecation="true" debug="${debug.mode}" includeantruntime="false" failonerror="true">
