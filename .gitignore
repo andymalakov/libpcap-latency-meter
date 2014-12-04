@@ -1,4 +1,6 @@
 target/
+data/
+lib/mf/
 
 #################
 ## Eclipse
