@@ -1,6 +1,7 @@
 package org.tinyfix.latency;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -49,19 +50,14 @@ public class Test {
 
         int i = 0;
         for (PcapIf device : alldevs) {
-            String description =
-                    (device.getDescription() != null) ? device.getDescription()
-                            : "No description available";
+            String description = (device.getDescription() != null) ? device.getDescription() : "No description available";
             System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
         }
 
 
 
         PcapIf device = alldevs.get(interfaceId);
-        System.out
-                .printf("\nChoosing '%s' on your behalf:\n",
-                        (device.getDescription() != null) ? device.getDescription()
-                                : device.getName());
+        System.out.printf("\nChoosing '%s' interface (filter:%s)\n", (device.getDescription() != null) ? device.getDescription() : device.getName(), filterExpression);
 
         /***************************************************************************
          * Second we open up the selected device
