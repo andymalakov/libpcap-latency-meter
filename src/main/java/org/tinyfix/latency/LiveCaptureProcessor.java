@@ -76,7 +76,7 @@ public class LiveCaptureProcessor<T> extends AbstractCaptureProcessor<T> {
             throw new Exception("Error compiling LIBPCAP filter: " + pcap.getErr());
 
         if (pcap.setFilter(program) != Pcap.OK)
-            throw new Exception("Error seeting LIBPCAP filter: " + pcap.getErr());
+            throw new Exception("Error setting LIBPCAP filter: " + pcap.getErr());
     }
 
     private static PcapIf selectPcapIf(int interfaceId) throws Exception {
