@@ -99,6 +99,7 @@
                 <pathelement path="${classesdir}"/>
             </classpath>
             <sysproperty key="java.library.path" value="${bin}"/>
+            <arg line="0"/>
         </java>
     </target> <!-- hello -->
 

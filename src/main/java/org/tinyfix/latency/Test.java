@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.jnetpcap.Pcap;
+import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
+import org.tinyfix.latency.common.CaptureSettings;
 
 /** Slightly modified sample from jNetPcap to test that library is working fine */
 public class Test {
@@ -18,7 +20,7 @@ public class Test {
      * @param args
      *          ignored
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //System.out.println ("Let's try a to load library directly...");
         //try {
         //    System.loadLibrary("jnetpcap");
@@ -26,6 +28,9 @@ public class Test {
         //    ex.printStackTrace();
         //}
 
+        // Command line args
+        int interfaceId = (args.length > 0) ? Integer.parseInt(args[0]) : 0; // We know we have at least 1 device
+        String filterExpression = (args.length > 1) ? args[1] : null;
 
         List<PcapIf> alldevs = new ArrayList<>(); // Will be filled with NICs
         StringBuilder errbuf = new StringBuilder(); // For any error msgs
@@ -50,7 +55,8 @@ public class Test {
             System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
         }
 
-        int interfaceId = (args.length > 0) ? Integer.parseInt(args[0]) : 0; // We know we have at least 1 device
+
+
         PcapIf device = alldevs.get(interfaceId);
         System.out
                 .printf("\nChoosing '%s' on your behalf:\n",
@@ -60,16 +66,19 @@ public class Test {
         /***************************************************************************
          * Second we open up the selected device
          **************************************************************************/
-        int snaplen = 64 * 1024;           // Capture all packets, no trucation
-        int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
-        int timeout = 10 * 1000;           // 10 seconds in millis
-        Pcap pcap =
-                Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);
+        Pcap pcap = Pcap.openLive(device.getName(), CaptureSettings.PACKET_SNAP_LENGTH, Pcap.MODE_PROMISCUOUS, CaptureSettings.OPEN_LIVE_TIMEOUT_MILLIS, errbuf);
 
-        if (pcap == null) {
-            System.err.printf("Error while opening device for capture: "
-                    + errbuf.toString());
-            return;
+        if (pcap == null)
+            throw new Exception ("Error while opening device for capture: " + errbuf.toString());
+
+        if (filterExpression != null) {
+            PcapBpfProgram program = new PcapBpfProgram();
+            final int netmask = (int)Long.parseLong(CaptureSettings.FILTER_NETWORK_MASK_HEX.toLowerCase(), 16);
+            if (pcap.compile(program, filterExpression, CaptureSettings.OPTIMIZE_FILTER ? 1 : 0, netmask) != Pcap.OK)
+                throw new Exception("Error compiling LIBPCAP filter: " + pcap.getErr());
+
+            if (pcap.setFilter(program) != Pcap.OK)
+                throw new Exception("Error setting LIBPCAP filter: " + pcap.getErr());
         }
 
         /***************************************************************************
