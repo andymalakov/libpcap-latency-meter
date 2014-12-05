@@ -99,7 +99,8 @@
                 <pathelement path="${classesdir}"/>
             </classpath>
             <sysproperty key="java.library.path" value="${bin}"/>
-            <arg line="0"/>
+            <arg value="0"/>
+            <arg value="tcp port 8000"/>
         </java>
     </target> <!-- hello -->
 
