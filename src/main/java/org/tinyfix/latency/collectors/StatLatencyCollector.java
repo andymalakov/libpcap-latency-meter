@@ -43,7 +43,8 @@ public class StatLatencyCollector implements LatencyCollector {
         if (++index == window.length) {
             TimeOfDayFormatter.formatTimeOfDay(System.currentTimeMillis(), timestampBuffer);
             System.out.print(timestampBuffer);
-            System.out.println(" min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.). Missed: " + numberOfMissingSignals + " Buffer: " + signalsBuffer.width());
+            float loss = 100.0f * numberOfMissingSignals / count;
+            System.out.println(" min:" + min + " max:" + max + " avg:" + sum/window.length + " (us.). Missed: " + numberOfMissingSignals + " (" + loss + "%) used buf: " + signalsBuffer.width());
 
             index = 0;
             sum = 0;
