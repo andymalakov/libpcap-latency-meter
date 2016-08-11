@@ -28,7 +28,7 @@ public class StatProcessor {
                 lastLine = line;
 
                 int lastComma = line.lastIndexOf(',');
-                long latency = Long.parseLong(line.substring(lastComma+1));
+                long latency = Long.parseLong(line.substring(lastComma+1).trim());
 
 
                 if (latency > Integer.MAX_VALUE)

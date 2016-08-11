@@ -152,6 +152,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="Andy">
+      <words>
+        <w>libpcap</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/libpcap-latency-meter.iml" filepath="$PROJECT_DIR$/libpcap-latency-meter.iml" />
@@ -183,4 +190,3 @@
     </library>
   </component>
 </project>
-

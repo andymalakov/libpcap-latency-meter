@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  *         Date: 3/5/14
  */
 public class Histogram {
-    private static final long HISTOGRAM_MAX_VALUE = Long.parseLong(System.getProperty("histogramHighestTrackableValue", Long.toString(TimeUnit.MINUTES.toMicros(5))));
+    private static final long HISTOGRAM_MAX_VALUE = Long.parseLong(System.getProperty("histogramHighestTrackableValue", Long.toString(TimeUnit.SECONDS.toMicros(5))));
 
     public static void main (String ...args) throws Exception {
         final File inputFile = new File(args[0]);
@@ -20,7 +20,9 @@ public class Histogram {
         String lastLine = null;
 
         // A Histogram covering the range from 1 nsec to 1 hour with 5 decimal point resolution:
-        final org.HdrHistogram.Histogram histogram = new org.HdrHistogram.Histogram(HISTOGRAM_MAX_VALUE, 3);
+        final double outputValueUnitScalingRatio = 1.0; // was 1000 (milliseconds)
+        final int numberOfSignificantValueDigits = 3; // was: 3 (up to microsecond)
+        final org.HdrHistogram.Histogram histogram = new org.HdrHistogram.Histogram(HISTOGRAM_MAX_VALUE, numberOfSignificantValueDigits);
         long min = Long.MAX_VALUE, max = 0;
         int signalCount = 0;
         try (LineNumberReader reader = new LineNumberReader(new FileReader(inputFile))) {
@@ -34,7 +36,7 @@ public class Histogram {
                 lastLine = line;
 
                 int lastComma = line.lastIndexOf(',');
-                long latency = Long.parseLong(line.substring(lastComma+1));
+                long latency = Long.parseLong(line.substring(lastComma+1).trim());
                 if (latency > Integer.MAX_VALUE)
                     throw new Exception("Latency value exceeds INT32: " + latency);
 
@@ -53,13 +55,14 @@ public class Histogram {
             System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " ()");
             System.out.println("MIN: " + min + " us.");
             System.out.println("MAX: " + max + " us.");
-            System.out.println("Histogram: (values below are in milliseconds):.");
+            System.out.println("Histogram: (values below are in microseconds):");
 
-            histogram.getHistogramData().outputPercentileDistribution(System.out, 5, 1000.0, false);
+            final int percentileTicksPerHalfDistance = 10;
+            histogram.getHistogramData().outputPercentileDistribution(System.out, percentileTicksPerHalfDistance, outputValueUnitScalingRatio, false);
 
             final File histFile = new File(inputFile.getAbsolutePath() + "-histogram.csv");
             try (PrintStream ps = new PrintStream(histFile)) {
-                histogram.getHistogramData().outputPercentileDistribution(ps, 5, 1000.0, true);
+                histogram.getHistogramData().outputPercentileDistribution(ps, percentileTicksPerHalfDistance, outputValueUnitScalingRatio, true);
             }
             System.out.println("Saved histogram into " + histFile.getAbsolutePath() + " ...");
 

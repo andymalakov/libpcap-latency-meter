@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="76176418-afaa-42d5-b7a7-2e64127f3a08" name="Default" comment="">
+    <list default="true" id="76176418-afaa-42d5-b7a7-2e64127f3a08" name="Default" comment="Minor improvements">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libpcap-latency-meter.ipr" afterPath="$PROJECT_DIR$/libpcap-latency-meter.ipr" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/libpcap-latency-meter.iws" afterPath="$PROJECT_DIR$/libpcap-latency-meter.iws" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/org/tinyfix/latency/AbstractCaptureProcessor.java" afterPath="$PROJECT_DIR$/src/main/java/org/tinyfix/latency/AbstractCaptureProcessor.java" />
@@ -1474,7 +1474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1412292305263</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Minor improvements">
+      <created>1470874796811</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1470874796811</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1570,7 +1577,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added MF jars" />
     <MESSAGE value="fix #2&#10;unit test that validates the fix" />
     <MESSAGE value="updated stat generator" />
     <MESSAGE value="polished output message" />
@@ -1595,7 +1601,8 @@
     <MESSAGE value="Test tool (copy from jNetpCap)" />
     <MESSAGE value="minor typo" />
     <MESSAGE value="Allow Test to specify capture filter" />
-    <option name="LAST_COMMIT_MESSAGE" value="Allow Test to specify capture filter" />
+    <MESSAGE value="Minor improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor improvements" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
