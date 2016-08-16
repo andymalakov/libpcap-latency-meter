@@ -26,6 +26,7 @@ public class Histogram {
         long min = Long.MAX_VALUE, max = 0;
         int signalCount = 0;
         try (LineNumberReader reader = new LineNumberReader(new FileReader(inputFile))) {
+            reader.readLine(); // skip header
             while (true) {
                 String line = reader.readLine();
                 if (line == null)
