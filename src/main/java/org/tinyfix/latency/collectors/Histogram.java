@@ -51,8 +51,8 @@ public class Histogram {
 
         if (signalCount > 0) {
             System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " ()");
-            System.out.println("MIN:   "   + histogram.getHistogramData().getValueAtPercentile(0.0)+ " us.");
-            System.out.println("50.000%:"  + histogram.getHistogramData().getValueAtPercentile(50)+ " us.");
+            System.out.println("MIN    : " + histogram.getHistogramData().getValueAtPercentile(0.0)+ " us.");
+            System.out.println("50.000%: " + histogram.getHistogramData().getValueAtPercentile(50)+ " us.");
             System.out.println("90.000%: " + histogram.getHistogramData().getValueAtPercentile(90)+ " us.");
             System.out.println("99.000%: " + histogram.getHistogramData().getValueAtPercentile(99)+ " us.");
             System.out.println("99.900%: " + histogram.getHistogramData().getValueAtPercentile(99.9)+ " us.");
