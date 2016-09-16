@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractCaptureProcessor<T> {
+    private static final boolean trimLeadingZeros = Boolean.getBoolean("correlationIdTrimLeadingZeros");
     protected String outputFile = "latencies.csv";
     protected TcpPacketFilter packetFilter;
     protected String inboundHandlerKey;
@@ -197,6 +198,11 @@ public class AbstractCaptureProcessor<T> {
             outboundIdListener = new TracingCorrelationIdListener("OUT> ", outboundIdListener);
         }
 
+        if (trimLeadingZeros) {
+            inboundIdListener = new TrimmingCorrelationIdListener(inboundIdListener);
+            outboundIdListener = new TrimmingCorrelationIdListener(outboundIdListener);
+        }
+
         CorrelationIdExtractor<T> inboundIdExtractor = protocolHandlers.create(inboundHandlerKey, inboundIdListener);
         CorrelationIdExtractor<T> outboundIdExtractor = protocolHandlers.create(outboundHandlerKey, outboundIdListener);
 
@@ -206,5 +212,22 @@ public class AbstractCaptureProcessor<T> {
 
     protected static String value (String arg) {
         return arg.substring(arg.indexOf(':') + 1);
+    }
+
+    /** Trim leading zeros */
+    private static final class TrimmingCorrelationIdListener implements CorrelationIdListener {
+        private final CorrelationIdListener delegate;
+
+        private TrimmingCorrelationIdListener(CorrelationIdListener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onCorrelationId(JPacket packet, byte[] buffer, int offset, int length) {
+            while (length > 0 && buffer[offset] == '0') {
+                offset++; length--;
+            }
+            delegate.onCorrelationId(packet, buffer, offset, length);
+        }
     }
 }
