@@ -11,9 +11,8 @@
     <description>LIBPCAP latency meter</description>
 
     <!-- set global properties for this script -->
-    <property name="verbose" value="false"/>
-    <property name="version" value="0.2RC1"/>
-    <property name="debug.mode" value="true"/>
+    <property file="build.properties"/>
+    <property name="debug.mode" value="false"/>
 
     <property environment="env"/>
 
