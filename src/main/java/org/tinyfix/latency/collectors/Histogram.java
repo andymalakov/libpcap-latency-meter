@@ -51,19 +51,19 @@ public class Histogram {
 
         if (signalCount > 0) {
             System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " ()");
-            System.out.println("MIN    : " + histogram.getHistogramData().getValueAtPercentile(0.0)+ " us.");
-            System.out.println("50.000%: " + histogram.getHistogramData().getValueAtPercentile(50)+ " us.");
-            System.out.println("90.000%: " + histogram.getHistogramData().getValueAtPercentile(90)+ " us.");
-            System.out.println("99.000%: " + histogram.getHistogramData().getValueAtPercentile(99)+ " us.");
-            System.out.println("99.900%: " + histogram.getHistogramData().getValueAtPercentile(99.9)+ " us.");
-            System.out.println("99.990%: " + histogram.getHistogramData().getValueAtPercentile(99.99)+ " us.");
-            System.out.println("99.999%: " + histogram.getHistogramData().getValueAtPercentile(99.999)+ " us.");
-            System.out.println("MAX    : " + histogram.getHistogramData().getValueAtPercentile(100)+ " us.");
+            System.out.println("MIN    : " + histogram.getValueAtPercentile(0.0)+ " us.");
+            System.out.println("50.000%: " + histogram.getValueAtPercentile(50)+ " us.");
+            System.out.println("90.000%: " + histogram.getValueAtPercentile(90)+ " us.");
+            System.out.println("99.000%: " + histogram.getValueAtPercentile(99)+ " us.");
+            System.out.println("99.900%: " + histogram.getValueAtPercentile(99.9)+ " us.");
+            System.out.println("99.990%: " + histogram.getValueAtPercentile(99.99)+ " us.");
+            System.out.println("99.999%: " + histogram.getValueAtPercentile(99.999)+ " us.");
+            System.out.println("MAX    : " + histogram.getValueAtPercentile(100)+ " us.");
             System.out.println("Histogram: (values below are in microseconds):");
 
             final File histFile = new File(inputFile.getAbsolutePath() + "-histogram.csv");
             try (PrintStream ps = new PrintStream(histFile)) {
-                histogram.getHistogramData().outputPercentileDistribution(ps, percentileTicksPerHalfDistance, outputValueUnitScalingRatio, true);
+                histogram.outputPercentileDistribution(ps, percentileTicksPerHalfDistance, outputValueUnitScalingRatio, true);
             }
             System.out.println("Saved histogram into " + histFile.getAbsolutePath() + " ...");
 
