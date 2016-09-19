@@ -162,6 +162,8 @@ public class AbstractCaptureProcessor<T> {
                 result.add(new CsvFileLatencyCollector2(outputFile));
             else
                 result.add(new CsvFileLatencyCollector(outputFile));
+        } else if (outputFile.toLowerCase().endsWith(".hlog")){
+            result.add(new HdrHistLatencyCollector(outputFile));
         } else {
             if (outputFile.toLowerCase().endsWith(".bin2"))
                 result.add(new BinaryFileLatencyCollector2(outputFile));

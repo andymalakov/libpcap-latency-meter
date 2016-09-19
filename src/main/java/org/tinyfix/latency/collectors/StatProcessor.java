@@ -2,22 +2,29 @@ package org.tinyfix.latency.collectors;
 
 import org.HdrHistogram.Histogram;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.io.File;
+import java.io.FileReader;
+import java.io.LineNumberReader;
+import java.io.PrintStream;
 
 public class StatProcessor {
+    private static final int PERCENTILE_TICKS_PER_HALF_DISTANCE = Integer.getInteger("percentileTicksPerHalfDistance", 10);
+    private static final double OUTPUT_VALUE_UNIT_SCALING_RATIO = Integer.getInteger("outputValueUnitScalingRatio", 1); // was 1000 (milliseconds)
+    private static final boolean USE_CSV_FORMAT = Boolean.getBoolean("useCsvFormat");
 
     public static void main (String ...args) throws Exception {
-        final String inputFile = args[0];
-        final int numberOfPoints = countNumberOfLines(inputFile) + 1;
-        final int [] sortedLatencies = new int [numberOfPoints];
+        final File inputFile = new File(args[0]);
 
         String firstLine = null;
         String lastLine = null;
 
+        // A Histogram covering the range from 1 nsec to 1 hour with 5 decimal point resolution:
+
+        final Histogram histogram = new Histogram(HdrHistLatencyCollector.HIGHEST_TRACKABLE_VALUE, HdrHistLatencyCollector.NUMBER_OF_SIGNIFICANT_VALUE_DIGITS);
+
         int signalCount = 0;
         try (LineNumberReader reader = new LineNumberReader(new FileReader(inputFile))) {
+            reader.readLine(); // skip header
             while (true) {
                 String line = reader.readLine();
                 if (line == null)
@@ -29,30 +36,31 @@ public class StatProcessor {
 
                 int lastComma = line.lastIndexOf(',');
                 long latency = Long.parseLong(line.substring(lastComma+1).trim());
-
-
                 if (latency > Integer.MAX_VALUE)
                     throw new Exception("Latency value exceeds INT32: " + latency);
 
-                sortedLatencies[signalCount] = (int)latency;
+                histogram.recordValue(latency);
                 signalCount++;
             }
         }
 
         if (signalCount > 0) {
+            System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " ()");
+            System.out.println("MIN    : " + histogram.getValueAtPercentile(0.0)+ " us.");
+            System.out.println("50.000%: " + histogram.getValueAtPercentile(50)+ " us.");
+            System.out.println("90.000%: " + histogram.getValueAtPercentile(90)+ " us.");
+            System.out.println("99.000%: " + histogram.getValueAtPercentile(99)+ " us.");
+            System.out.println("99.900%: " + histogram.getValueAtPercentile(99.9)+ " us.");
+            System.out.println("99.990%: " + histogram.getValueAtPercentile(99.99)+ " us.");
+            System.out.println("99.999%: " + histogram.getValueAtPercentile(99.999)+ " us.");
+            System.out.println("MAX    : " + histogram.getValueAtPercentile(100)+ " us.");
+            System.out.println("Histogram: (values below are in microseconds):");
 
-            System.out.println("Latency results for " + signalCount + " signals collected from " + cutTimestamp(firstLine) + " ... to " + cutTimestamp(lastLine) + " (microseconds)");
-            Arrays.sort(sortedLatencies, 0, signalCount);
-            System.out.println("MIN: " + sortedLatencies[0]);
-            System.out.println("MAX: " + sortedLatencies[signalCount-1]);
-            System.out.println("MEDIAN: " + sortedLatencies[signalCount/2]);
-
-            System.out.println("99.000%: " + sortedLatencies[ (int)   (99L*signalCount/100)]);
-            System.out.println("99.900%: " + sortedLatencies[ (int)  (999L*signalCount/1000)]);
-            System.out.println("99.990%: " + sortedLatencies[ (int) (9999L*signalCount/10000)]);
-            System.out.println("99.999%: " + sortedLatencies[ (int)(99999L*signalCount/100000)]);
-            System.out.println("99.9999%: " + sortedLatencies[ (int)(999999L*signalCount/1000000)]);
-            System.out.println("99.99999%:" + sortedLatencies[ (int)(9999999L*signalCount/10000000)]);
+            final File histFile = new File(inputFile.getAbsolutePath() + "-histogram.csv");
+            try (PrintStream ps = new PrintStream(histFile)) {
+                histogram.outputPercentileDistribution(ps, PERCENTILE_TICKS_PER_HALF_DISTANCE, OUTPUT_VALUE_UNIT_SCALING_RATIO, USE_CSV_FORMAT);
+            }
+            System.out.println("Saved histogram into " + histFile.getAbsolutePath() + " ...");
         }
     }
 
@@ -63,24 +71,5 @@ public class StatProcessor {
                 return line.substring(0, commaIndex);
         }
         return  "?";
-    }
-
-    private static int countNumberOfLines(String filename) throws IOException {
-        int count = 0;
-        boolean isEmpty = true;
-
-        try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
-            byte[] c = new byte[1024];
-            int readChars;
-            while ((readChars = is.read(c)) != -1) {
-                isEmpty = false;
-                for (int i = 0; i < readChars; ++i) {
-                    if (c[i] == '\n') {
-                        ++count;
-                    }
-                }
-            }
-        }
-        return (count == 0 && !isEmpty) ? 1 : count;
     }
 }
